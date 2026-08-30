@@ -409,3 +409,55 @@ async function triggerEvidenceEngine() {
     alert('Error running evidence engine: ' + err.message);
   }
 }
+
+async function handleDocUpload(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const fileInput = document.getElementById('ingest-file');
+  const titleInput = document.getElementById('ingest-title');
+  
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+    alert('Please select a file to upload.');
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const title = titleInput ? titleInput.value.trim() : '';
+  
+  const formData = new FormData();
+  formData.append('file', file);
+  if (title) formData.append('title', title);
+  
+  const submitBtn = e.target ? e.target.querySelector('button[type="submit"]') : null;
+  const originalText = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Analyzing & Extracting...</span>`;
+  }
+  
+  try {
+    const res = await fetch('/api/ingest/upload', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Upload failed (${res.status}): ${err}`);
+    }
+    
+    const result = await res.json();
+    alert(`✓ Document Successfully Ingested!\n\n🤖 AI Auto-Classification: ${result.auto_detected_doc_type || 'Audited Filing'}\n📊 Facts Extracted: ${result.facts_extracted_count || 0}\n\nEvidence and consistency engines triggered automatically.`);
+    
+    fileInput.value = '';
+    if (titleInput) titleInput.value = '';
+    loadIngestedDocuments();
+    loadConflicts();
+  } catch (err) {
+    alert('Error uploading document: ' + err.message);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  }
+}

@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api/ingest", tags=["Document Ingestion"])
 @router.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    doc_type: str = Form("Audited Annual Report"),
+    doc_type: Optional[str] = Form(None),
     title: Optional[str] = Form(None)
 ):
     save_path = DOCUMENTS_DIR / file.filename
@@ -63,6 +63,7 @@ async def upload_document(
         "status": "success",
         "doc_id": doc_meta.id,
         "filename": doc_meta.filename,
+        "auto_detected_doc_type": processed["detected_doc_type"],
         "facts_extracted_count": len(saved_fact_ids),
         "facts": processed["facts"]
     }
