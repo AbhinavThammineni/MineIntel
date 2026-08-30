@@ -9,13 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function toggleOfficerAuth() {
   if (currentOfficerRole === 'analyst') {
-    const pin = prompt('🔐 Government e-Sign Gateway\nEnter Official Security PIN to authenticate as Approving Officer (Demo PIN: 1234):');
+    const pin = prompt('Government e-Sign Gateway\nEnter Official Security PIN to authenticate as Approving Officer (Demo PIN: 1234):');
     if (pin === '1234') {
       currentOfficerRole = 'approver';
       updateAuthUI();
-      alert('✓ Authenticated as: Under Secretary (Coal Operations)\nAuthorization: Statutory Digital Approval & Sign-Off UNLOCKED.');
+      alert('Authenticated as: Under Secretary (Coal Operations)\nAuthorization: Statutory Digital Approval & Sign-Off UNLOCKED.');
     } else if (pin !== null) {
-      alert('❌ Invalid Security PIN. Access denied. (Use Demo PIN: 1234)');
+      alert('Invalid Security PIN. Access denied. (Use Demo PIN: 1234)');
     }
   } else {
     currentOfficerRole = 'analyst';
@@ -29,7 +29,7 @@ function updateAuthUI() {
   if (badge) {
     if (currentOfficerRole === 'approver') {
       badge.innerHTML = `
-        <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-500/30 transition" onclick="toggleOfficerAuth()">
+        <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-500/30 transition shadow-sm" onclick="toggleOfficerAuth()">
           <i class="fa-solid fa-user-shield text-emerald-400"></i>
           <span>Role: Approving Officer (Authenticated)</span>
           <i class="fa-solid fa-arrow-right-from-bracket ml-1 text-slate-400 text-[10px]" title="Switch to Analyst"></i>
@@ -37,18 +37,16 @@ function updateAuthUI() {
       `;
     } else {
       badge.innerHTML = `
-        <span class="px-3 py-1.5 bg-slate-900 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:border-emerald-500 transition" onclick="toggleOfficerAuth()">
+        <span class="px-3 py-1.5 bg-slate-900 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:border-emerald-500 transition shadow-sm" onclick="toggleOfficerAuth()">
           <i class="fa-solid fa-user text-slate-400"></i>
-          <span>Role: Analyst (Read-Only)</span>
+          <span>Role: Analyst (View-Only)</span>
           <span class="text-[10px] text-emerald-400 underline ml-1">[Unlock Approver PIN]</span>
         </span>
       `;
     }
   }
 
-  // Refresh any currently rendered draft button
-  const currentDraftId = window.activeDraftObj?.id;
-  if (currentDraftId && window.activeDraftObj) {
+  if (window.activeDraftObj) {
     renderParliamentaryDraft(window.activeDraftObj);
   }
 }
@@ -105,33 +103,45 @@ function renderParliamentaryDraft(draft) {
   
   let annexureRows = '';
   if (draft.annexure_table && draft.annexure_table.length > 0) {
-    annexureRows = draft.annexure_table.map(s => `
-      <tr class="hover:bg-slate-800/40">
-        <td class="p-3 font-bold text-white">${s.subsidiary}</td>
-        <td class="p-3 text-center text-slate-300">${s.start_year_val} MT</td>
-        <td class="p-3 text-center font-bold text-emerald-400">${s.end_year_val} MT</td>
-        <td class="p-3 text-center ${s.total_growth_pct >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-semibold">${s.total_growth_pct > 0 ? '+' : ''}${s.total_growth_pct}%</td>
-        <td class="p-3 text-center font-semibold text-slate-300">${s.cagr_pct ? `${s.cagr_pct}%` : 'N/A'}</td>
-      </tr>
-    `).join('');
+    annexureRows = draft.annexure_table.map(s => {
+      const growthStr = (s.total_growth_pct !== null && s.total_growth_pct !== undefined) 
+        ? `${s.total_growth_pct > 0 ? '+' : ''}${s.total_growth_pct}%` 
+        : 'N/A';
+      const growthColor = (s.total_growth_pct !== null && s.total_growth_pct !== undefined)
+        ? (s.total_growth_pct >= 0 ? 'text-emerald-400' : 'text-rose-400')
+        : 'text-slate-400';
+      const cagrStr = (s.cagr_pct !== null && s.cagr_pct !== undefined) ? `${s.cagr_pct}%` : 'N/A';
+
+      return `
+        <tr class="hover:bg-slate-800/40">
+          <td class="p-3 font-bold text-white">${s.subsidiary}</td>
+          <td class="p-3 text-center text-slate-300">${s.start_year_val || 0} MT</td>
+          <td class="p-3 text-center font-bold text-emerald-400">${s.end_year_val || 0} MT</td>
+          <td class="p-3 text-center ${growthColor} font-semibold">${growthStr}</td>
+          <td class="p-3 text-center font-semibold text-slate-300">${cagrStr}</td>
+        </tr>
+      `;
+    }).join('');
   }
 
   const isApproved = draft.approval_status === 'Approved';
 
   container.innerHTML = `
-    <div class="glass-card rounded-2xl p-8 shadow-2xl space-y-6 border border-slate-800 relative animate-in fade-in duration-200">
+    <div id="active-parl-card" class="glass-card rounded-2xl p-8 shadow-2xl space-y-6 border border-slate-800 relative animate-in fade-in duration-200">
+      
+      <!-- TOP ACTION & CLOSE BAR -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-5 gap-3">
         <div>
           <div class="flex items-center gap-2">
             <span class="px-3 py-0.5 text-[11px] font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'} rounded-full">
-              Status: ${draft.approval_status.toUpperCase()}
+              STATUS: ${draft.approval_status.toUpperCase()}
             </span>
             <span class="text-xs text-slate-400 font-medium">${draft.session} • ${draft.house}</span>
           </div>
           <h3 class="text-lg font-bold text-white mt-1.5">${draft.question_no}: ${draft.question_text}</h3>
         </div>
         
-        <!-- Action Buttons (RBAC Guarded) -->
+        <!-- Action Buttons Group -->
         <div class="flex flex-wrap items-center gap-2">
           ${!isApproved ? (
             currentOfficerRole === 'approver' ? `
@@ -142,7 +152,7 @@ function renderParliamentaryDraft(draft) {
             ` : `
               <button onclick="toggleOfficerAuth()" class="px-3 py-2 bg-slate-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
                 <i class="fa-solid fa-lock text-amber-400"></i>
-                <span>Sign-Off Locked (Click to Unlock PIN)</span>
+                <span>Sign-Off Locked (Unlock PIN)</span>
               </button>
             `
           ) : `
@@ -156,9 +166,10 @@ function renderParliamentaryDraft(draft) {
             <i class="fa-solid fa-print mr-1"></i> Print / PDF
           </button>
           
-          <!-- Instant Collapse / Close Button -->
-          <button onclick="closeParliamentaryDraftView()" class="px-3 py-2 bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-xl text-xs font-semibold transition border border-slate-700" title="Collapse Statement">
-            <i class="fa-solid fa-xmark mr-1"></i> Close View
+          <!-- PROMINENT CLOSE / DISMISS BUTTON -->
+          <button onclick="closeParliamentaryDraftView()" class="px-4 py-2 bg-rose-950/70 hover:bg-rose-900 border border-rose-500/50 text-rose-300 hover:text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md">
+            <i class="fa-solid fa-xmark text-sm"></i>
+            <span>Close Statement</span>
           </button>
         </div>
       </div>
@@ -167,7 +178,7 @@ function renderParliamentaryDraft(draft) {
       <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner relative">
         ${isApproved ? `
           <div class="absolute top-4 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
-            <i class="fa-solid fa-seal text-xs"></i> STATUTORILY APPROVED & SIGNED
+            <i class="fa-solid fa-stamp text-xs"></i> STATUTORILY APPROVED & SIGNED
           </div>
         ` : ''}
 ${draft.drafted_response}
@@ -199,6 +210,15 @@ ${draft.drafted_response}
           </table>
         </div>
       </div>
+
+      <!-- BOTTOM CLOSE & DISMISS BAR -->
+      <div class="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs">
+        <span class="text-slate-500 font-mono">Statement ID: ${draft.id}</span>
+        <button onclick="closeParliamentaryDraftView()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition border border-slate-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-up"></i>
+          <span>Close / Dismiss Statement View</span>
+        </button>
+      </div>
     </div>
   `;
 }
@@ -229,7 +249,7 @@ async function approveDraft(draftId) {
     });
     if (!res.ok) throw new Error('Failed to approve draft on server');
     
-    alert('✅ Parliamentary Statement officially approved and digitally signed by Under Secretary!');
+    alert('Parliamentary Statement officially approved and digitally signed by Under Secretary!');
     
     const draftsRes = await fetch('/api/parliament/list');
     if (draftsRes.ok) {
@@ -291,8 +311,8 @@ async function loadSavedDraftsArchive() {
                 </td>
                 <td class="p-3.5 text-slate-300 text-[11px]">${d.approved_by || '<span class="text-slate-500 italic">Pending Approval</span>'}</td>
                 <td class="p-3.5 text-center">
-                  <button onclick="viewArchivedDraft('${d.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700 shadow-sm">
-                    <i class="fa-solid fa-eye mr-1"></i> View
+                  <button onclick="viewArchivedDraft('${d.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition shadow-sm flex items-center gap-1 mx-auto">
+                    <i class="fa-solid fa-eye"></i> View Statement
                   </button>
                 </td>
               </tr>
