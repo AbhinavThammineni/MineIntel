@@ -1,126 +1,189 @@
-﻿# ⛏️ MineIntel: Mining Intelligence & Evidence-Based Verification Platform
+# ⛏️ MineIntel — Enterprise Mining Intelligence & Evidence Engine
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-009688.svg)](https://fastapi.tiangolo.com)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success.svg)]()
+<div align="center">
 
-> **"Documents are the raw material → MineIntel processes them → verified, audit-backed mining intelligence comes out."**
+[![Live Deployment](https://img.shields.io/badge/Vercel-Live%20Platform-emerald?style=for-the-badge&logo=vercel)](https://mine-intel.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-AbhinavThammineni%2FMineIntel-blue?style=for-the-badge&logo=github)](https://github.com/AbhinavThammineni/MineIntel)
+[![Python FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Leaflet GIS](https://img.shields.io/badge/Leaflet-GIS%20Mapping-199900?style=for-the-badge&logo=leaflet)](https://leafletjs.com)
+[![License](https://img.shields.io/badge/License-MIT-amber?style=for-the-badge)](LICENSE)
 
-MineIntel is an enterprise-grade Mining Intelligence platform that ingests unstructured mining documents (scans, PDFs, Excel sheets, Word files), extracts structured facts, resolves entities and units, stores data across a Tri-Store architecture (PostgreSQL, pgvector, Neo4j), and validates multi-document consistency using a deterministic **Evidence & Consistency Engine**.
+**An evidence-based, mathematically grounded intelligence platform for Indian coal mining statutory filings, parliamentary drafts, geospatial telemetry, and automated consistency auditing.**
+
+[🚀 Explore Live Platform](https://mine-intel.vercel.app) • [📖 Architecture & Core Flow](#-core-8-word-architecture) • [✨ Key Modules](#-platform-modules) • [🔐 Security & RBAC](#-government-rbac--officer-sign-off)
 
 ---
 
-## 🧠 The 8-Word Core Architecture
+</div>
 
-$$\mathbf{READ \longrightarrow UNDERSTAND \longrightarrow EXTRACT \longrightarrow CLEAN \longrightarrow STORE \longrightarrow VERIFY \longrightarrow ANSWER \longrightarrow REPORT}$$
+## 📌 Problem Statement & Overview
+
+Government ministries, regulatory authorities, and mining enterprises (such as **Coal India Limited**, **Ministry of Coal**, and its subsidiaries) manage thousands of pages of unstructured statutory filings, monthly flash figures, geological survey reports, and annual audited accounts. 
+
+Standard LLM RAG pipelines often suffer from:
+1. **Hallucinated figures and incorrect mathematical trends (CAGR/percentages)**.
+2. **Lack of verifiable provenance or visual bounding-box evidence**.
+3. **Data conflicts between provisional flash estimates and audited annual accounts**.
+4. **Governance risks where unauthorized roles could approve parliamentary statements**.
+
+**MineIntel solves this with a multi-store deterministic engine that blends SQL fact tables, pgvector semantic search, Neo4j knowledge lineage, and human-in-the-loop statutory sign-offs.**
+
+---
+
+## ⚡ Core 8-Word Architecture
+
+MineIntel operates on a deterministic, audit-proof data pipeline:
+
+$$\text{READ} \longrightarrow \text{UNDERSTAND} \longrightarrow \text{EXTRACT} \longrightarrow \text{CLEAN} \longrightarrow \text{STORE} \longrightarrow \text{VERIFY} \longrightarrow \text{ANSWER} \longrightarrow \text{REPORT}$$
 
 ```mermaid
-flowchart TD
-    subgraph INGEST["1. Document Intelligence (READ)"]
-        D_RAW["Documents: PDF / Scans / XLSX / DOCX / JPG"] --> D_OCR["OCR • Digital PDF Parsing • Table Extraction"]
-        D_OCR --> D_BBOX["Preserve Page Numbers & Token Bounding Boxes"]
-    end
-
-    subgraph STRUCT["2. AI & Extraction Layer (UNDERSTAND & EXTRACT)"]
-        D_BBOX --> E_STRUCT["LLM / NLP Structured Fact Extractor"]
-        E_STRUCT --> E_ATTR["Entities (Mines/Subsidiaries) • Metrics • Values • Units • Fiscal Years"]
-    end
-
-    subgraph CLEAN["3. Normalization Layer (CLEAN)"]
-        E_ATTR --> N_UNIT["Unit Normalization (12,500 KT -> 12.5 MT)"]
-        N_UNIT --> N_ALIAS["Alias Standardization (BCCL -> Bharat Coking Coal Limited)"]
-        N_ALIAS --> N_FUZZY["Entity Resolution & OCR Typo Healing"]
-    end
-
-    subgraph STORE["4. Tri-Store Architecture (STORE)"]
-        N_FUZZY --> S_PG[("PostgreSQL / SQLite Facts\nExact Numbers, Mines, Audit Trails")]
-        N_FUZZY --> S_VEC[("pgvector / Vector Store\nSemantic Explanations & Notes")]
-        N_FUZZY --> S_GRAPH[("Neo4j / Provenance Graph\nCIL -> Sub -> Mine -> Fact -> Doc -> Box")]
-    end
-
-    subgraph ENGINE["5. Evidence & Consistency Engine (VERIFY)"]
-        S_PG & S_VEC & S_GRAPH --> V_DISC["Discrepancy & Conflict Detection"]
-        V_DISC --> V_SUPER["Supersession: Provisional (10.2 MT) -> Audited (12.5 MT)"]
-        V_DISC --> V_GENUINE["Genuine Conflict Alert: Multiple Official Reports Differ"]
-        V_DISC --> V_ANOM["Statistical Anomaly: Outliers + Semantic Root-Cause Lookup"]
-    end
-
-    subgraph OUTPUT["6. Query, Analytics & Interfaces (ANSWER & REPORT)"]
-        ENGINE --> Q_MATH["Deterministic Python Math (YoY, CAGR, Variances)"]
-        Q_MATH --> UI_QA["💬 1. Verified Q&A (Bounding Box Citations)"]
-        Q_MATH --> UI_GIS["🗺️ 2. GIS Coalfield Map & Anomaly Layer"]
-        Q_MATH --> UI_REP["📄 3. Automated Production & Audit Reports"]
-        Q_MATH --> UI_PARL["🏛️ 4. Parliamentary Draft Generator"]
-    end
+graph LR
+    A[1. Ingest Documents<br/>PDF/Scans/Excel] --> B[2. Token Bounding Boxes<br/>OCR & Structure]
+    B --> C[3. Data Normalization<br/>Unit Canonicalization]
+    C --> D[4. Multi-Store Persistence<br/>SQL + Vector + Graph]
+    D --> E[5. Consistency Engine<br/>Supersession & Conflict Triage]
+    E --> F[6. Deterministic Math<br/>CAGR & Annexures]
+    F --> G[7. Evidence UI & GIS<br/>19 Coalfields & Bounding Boxes]
+    G --> H[8. RBAC Approval<br/>Parliamentary Sign-Off]
 ```
 
 ---
 
-## 🗄️ Tri-Store Architecture
+## ✨ Platform Modules
 
-| Database Store | Purpose | Example Query |
-| :--- | :--- | :--- |
-| **🟦 PostgreSQL / SQL** | **"What is the exact data?"** | *"What was Mine A's production in 2023?"* $\to$ **12.5 MT** (Zero Hallucination) |
-| **🟨 pgvector / Vectors** | **"Where is the explanation?"** | *"Why did output decrease?"* $\to$ Matches *"equipment downtime & pit floods"* |
-| **🟩 Neo4j / Graph** | **"How is it connected?"** | Traces lineage: $\text{CIL} \to \text{BCCL} \to \text{Mine A} \to \text{Document} \to \text{Bounding Box}$ |
+### 1. 🛡️ Evidence-Backed Q&A Assistant
+- **Deterministic Compute:** Mathematical queries (e.g., CAGR, growth percentages, year-over-year production comparisons) are calculated via verified Python routines—never estimated by raw language models.
+- **Visual Bounding-Box Provenance:** Every response includes high-confidence citation badges linking directly to the statutory document, page number, and highlighted bounding box.
+
+### 2. 🗺️ Geospatial Mine Command & Anomaly Map
+- **19 Major Indian Coalfields:** Interactive GIS tracking across SECL (Gevra, Kusmunda, Dipka), MCL (Lakhanpur, Bhubaneswari), NCL (Jayant, Nigahi), CCL (Amrapali, Ashoka, Piparwar), ECL (Rajmahal, Sonepur Bazari), BCCL (Block II, Kusunda, Moonidih), and WCL (Penganga, Umrer).
+- **Live Mine Telemetry Drawer:** Tapping any mine marker reveals historical output trajectories (FY 2021-22 to FY 2024-25), overburden removal ($MCuM$) stripping rates, operational status, and document audit records.
+- **100% Free Global Tiles:** High-speed OpenStreetMap CDN integration with zero API keys or watermarks.
+
+### 3. 📊 Automated 6-Part Statutory Report Builder
+- Compiles complete statutory intelligence reports in 1 click across 6 formal sections:
+  1. **Executive Summary**
+  2. **Subsidiary Production & Deterministic CAGR Matrix**
+  3. **Overburden Removal ($MCuM$) Matrix**
+  4. **State-Wise Resource & Output Allocation**
+  5. **Operational Anomalies & Root-Cause Log**
+  6. **Data Consistency & Supersession Audit Trail**
+- Built-in **Print / PDF export** functionality formatted for official ministry distribution.
+
+### 4. 🏛️ Parliamentary Question & Statement Engine (with RBAC)
+- Drafts formal **Lok Sabha & Rajya Sabha** ministry replies with auto-compiled **Annexure-I** tables.
+- **Officer e-Sign Gateway:** Role-based access control protecting approvals.
+  - **Analyst Role (`View-Only`):** Can query, inspect data, and preview drafted statements.
+  - **Approving Officer (`Under Secretary`):** Authenticates via Security PIN (`1234`) to apply the statutory digital seal.
+- **Instant Statement Collapse:** Prominent close actions at both top and bottom of draft cards without requiring page reloads.
+
+### 5. ⚖️ Evidence Consistency & Conflict Triage Center
+- **Automated Supersession:** Automatically reconciles provisional flash reports (Authority Rank 30) when final audited annual filings (Authority Rank 100) are released, maintaining complete historical audit lineage.
+- **Genuine Conflict Triage:** When equal-ranked statutory filings differ, the system avoids guessing and raises an interactive discrepancy triage card for human officer sign-off.
+
+### 6. 📱 Mobile-First Responsive Design
+- Optimized for desktop, tablets, and smartphones ($360\text{px} - 414\text{px}$).
+- Uses responsive touch cards for parliamentary archives and conflict logs with zero horizontal clipping.
+- Smooth horizontal swipe wrappers for all data tables (`Swipe table ➔`).
+- Automatic smooth-scrolling to the GIS drawer upon marker selection on mobile.
 
 ---
 
-## ⚡ Key Features
+## 🔐 Government RBAC & Officer Sign-Off
 
-1. **Deterministic Anti-Hallucination Engine:** All arithmetic (CAGR, growth percentages, sums, variances) is computed strictly in Python code.
-2. **Automated Supersession Resolution:** Automatically replaces provisional flash figures with final statutory audited numbers while maintaining an audit trail.
-3. **Genuine Conflict Triage:** Detects when two authoritative official reports disagree and flags them for human officer verification.
-4. **Statistical Anomaly Detection:** Detects $+150\%$ spikes and $-35\%$ drops, querying pgvector to explain the operational root cause.
-5. **Interactive GIS Map:** Real-time spatial tracking of Indian coalfields (Jharkhand, Odisha, Chhattisgarh, MP, Maharashtra, WB) with anomaly rings and conflict flags.
-6. **Parliamentary Statement Generator:** Formulates official Ministry of Coal replies for Lok Sabha / Rajya Sabha with Annexure tables and an **Officer Sign-Off Workflow** (*AI drafts, Human approves*).
+To ensure strict statutory governance, approvals follow a cryptographic role-based model:
+
+| Role | Access Level | Capabilities | PIN Required |
+| :--- | :--- | :--- | :---: |
+| **Mining Analyst** | `View-Only` | Query facts, inspect GIS map, generate preview drafts | ❌ No |
+| **Under Secretary (Coal Operations)** | `Authorized Approver` | Statutorily approve, digitally sign, and archive official statements | ✅ Demo PIN: `1234` |
 
 ---
 
-## 🚀 Quick Start (Local Setup)
+## 📂 Project Structure
 
-### 1. Clone the repository
+```text
+MineIntel/
+├── api/
+│   └── index.py                    # Vercel Serverless entrypoint (/tmp storage handler)
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── routes_qa.py        # Verified Q&A & Math Compute Endpoints
+│   │   │   ├── routes_gis.py       # GIS Map & 19 Mines Telemetry API
+│   │   │   ├── routes_reports.py   # 6-Part Automated Report Builder API
+│   │   │   ├── routes_parliament.py# Parliamentary Drafts & Sign-Off API
+│   │   │   ├── routes_conflicts.py # Supersession & Discrepancy Triage API
+│   │   │   └── routes_ingest.py    # Document Extraction Pipeline API
+│   │   ├── engine/
+│   │   │   ├── analytics_engine.py # Deterministic CAGR & Statistical Analytics
+│   │   │   └── consistency_engine.py# Automated Supersession & Conflict Logic
+│   │   ├── storage/
+│   │   │   ├── fact_store.py       # SQLite / PostgreSQL Relational Store
+│   │   │   ├── vector_store.py     # pgvector Semantic Passage Embeddings
+│   │   │   └── graph_store.py      # Neo4j Entity & Document Provenance Graph
+│   │   ├── config.py               # Environment & Vercel /tmp Path Config
+│   │   └── main.py                 # FastAPI Application & Exception Handler
+│   └── data/
+│       ├── mineintel_facts.db      # Pre-seeded SQLite database with 19 mines
+│       ├── mineintel_graph.json    # Lineage knowledge graph
+│       └── mineintel_vectors.json  # Semantic vector embeddings
+├── frontend/
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── styles.css          # High-tech glassmorphism & mobile styling
+│   │   └── js/
+│   │       ├── app.js              # Core UI controller & responsive cards
+│   │       ├── gis_map.js          # Leaflet GIS controller (OpenStreetMap CDN)
+│   │       ├── parliament_draft.js # RBAC gateway & statement collapse
+│   │       ├── report_generator.js # 6-section report compiler
+│   │       └── doc_viewer.js       # Bounding-box viewer modal (multi-trigger close)
+│   └── index.html                  # Main responsive single-page application
+├── requirements.txt                # Production Python dependencies
+├── vercel.json                     # Vercel routing & serverless configuration
+└── README.md                       # Comprehensive documentation
+```
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Clone the Repository
 ```bash
 git clone https://github.com/AbhinavThammineni/MineIntel.git
 cd MineIntel
 ```
 
-### 2. Install dependencies
+### 2. Create Virtual Environment & Install Dependencies
 ```bash
-pip install -r backend/requirements.txt
+python -m venv venv
+# On Windows:
+.\venv\Scripts\activate
+# On Linux/macOS:
+source venv/bin/activate
+
+pip install -r requirements.txt
 ```
 
-### 3. Seed demo intelligence database
+### 3. Run FastAPI Backend & Frontend
 ```bash
-cd backend
-python seed_data.py
+uvicorn backend.app.main:app --reload --port 8000
 ```
-
-### 4. Start the server
-```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+Open your browser at `http://localhost:8000` to interact with the full dashboard.
 
 ---
 
-## 🧪 Running Automated Tests
+## 🌐 Cloud Deployment (Vercel)
 
-```bash
-python -m pytest tests -v
-```
-*All 9 unit & integration tests covering extraction, normalization, conflict resolution, supersession, and CAGR math pass with 100% success rate.*
+MineIntel is configured for **1-click serverless deployment** on Vercel:
+- Automatically redirects static assets from `/frontend`
+- Mounts FastAPI backend endpoints via `api/index.py`
+- Handles read-only cloud filesystem constraints by seamlessly caching runtime data in writable `/tmp/mineintel_data`.
 
----
-
-## 🐳 Docker Deployment
-
-```bash
-docker compose up -d --build
-```
+**Live Production URL:** [https://mine-intel.vercel.app](https://mine-intel.vercel.app)
 
 ---
 
 ## 📜 License
-MIT License. Developed for Advanced Mining Intelligence and Evidence Verification.
+
+This project is licensed under the **MIT License** — feel free to use and extend for enterprise mining intelligence and statutory compliance applications.
