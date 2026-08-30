@@ -63,7 +63,7 @@ async function generateParliamentaryDraft(e) {
   if (!container) return;
 
   container.innerHTML = `
-    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3 border border-slate-800">
+    <div class="glass-card rounded-2xl p-8 sm:p-12 text-center text-slate-400 space-y-3 border border-slate-800">
       <i class="fa-solid fa-landmark-dome fa-bounce text-emerald-400 text-3xl"></i>
       <p class="text-xs">Executing deterministic math on statutory database, compiling Annexure-I, and drafting official ministry reply...</p>
     </div>
@@ -88,7 +88,7 @@ async function generateParliamentaryDraft(e) {
 
   } catch (err) {
     container.innerHTML = `
-      <div class="p-6 bg-red-500/10 border border-red-500/30 rounded-2xl text-xs text-red-400 space-y-2">
+      <div class="p-4 sm:p-6 bg-red-500/10 border border-red-500/30 rounded-2xl text-xs text-red-400 space-y-2">
         <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-circle-exclamation"></i> Error Drafting Parliamentary Statement</div>
         <p>${err.message}</p>
       </div>
@@ -127,18 +127,18 @@ function renderParliamentaryDraft(draft) {
   const isApproved = draft.approval_status === 'Approved';
 
   container.innerHTML = `
-    <div id="active-parl-card" class="glass-card rounded-2xl p-8 shadow-2xl space-y-6 border border-slate-800 relative animate-in fade-in duration-200">
+    <div id="active-parl-card" class="glass-card rounded-2xl p-4 sm:p-8 shadow-2xl space-y-5 border border-slate-800 relative animate-in fade-in duration-200">
       
       <!-- TOP ACTION & CLOSE BAR -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-5 gap-3">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-3">
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-3 py-0.5 text-[11px] font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'} rounded-full">
+            <span class="px-2.5 py-0.5 text-[10px] sm:text-[11px] font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'} rounded-full">
               STATUS: ${draft.approval_status.toUpperCase()}
             </span>
             <span class="text-xs text-slate-400 font-medium">${draft.session} • ${draft.house}</span>
           </div>
-          <h3 class="text-lg font-bold text-white mt-1.5">${draft.question_no}: ${draft.question_text}</h3>
+          <h3 class="text-base sm:text-lg font-bold text-white mt-1.5">${draft.question_no}: ${draft.question_text}</h3>
         </div>
         
         <!-- Action Buttons Group -->
@@ -158,7 +158,7 @@ function renderParliamentaryDraft(draft) {
           ) : `
             <span class="px-3 py-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5">
               <i class="fa-solid fa-circle-check text-emerald-400"></i>
-              <span>Signed by: ${draft.approved_by || 'Under Secretary (Coal Operations)'}</span>
+              <span>Signed by: ${draft.approved_by || 'Under Secretary'}</span>
             </span>
           `}
           
@@ -175,9 +175,9 @@ function renderParliamentaryDraft(draft) {
       </div>
 
       <!-- Formal Ministry Laid on Table Statement -->
-      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner relative">
+      <div class="bg-slate-950 p-4 sm:p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner relative">
         ${isApproved ? `
-          <div class="absolute top-4 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+          <div class="sm:absolute top-4 right-4 mb-2 sm:mb-0 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider">
             <i class="fa-solid fa-stamp text-xs"></i> STATUTORILY APPROVED & SIGNED
           </div>
         ` : ''}
@@ -185,18 +185,18 @@ ${draft.drafted_response}
       </div>
 
       <!-- Annexure-I -->
-      <div class="space-y-3">
+      <div class="space-y-2.5">
         <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <i class="fa-solid fa-table text-emerald-400"></i>
             ANNEXURE-I: SUBSIDIARY-WISE PRODUCTION & CAGR METRICS
           </h4>
-          <span class="text-[10px] text-slate-500 font-mono">CONFIDENTIAL OFFICIAL PARLIAMENTARY RECORD</span>
+          <span class="text-[10px] text-slate-500 font-mono hidden sm:inline">OFFICIAL PARLIAMENTARY RECORD</span>
         </div>
-        <div class="overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper border border-slate-800 rounded-xl bg-slate-950">
+          <table class="w-full text-left text-xs border-collapse min-w-[500px]">
             <thead>
-              <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">Subsidiary</th>
                 <th class="p-3 text-center">FY 2021-22</th>
                 <th class="p-3 text-center">FY 2024-25</th>
@@ -212,8 +212,8 @@ ${draft.drafted_response}
       </div>
 
       <!-- BOTTOM CLOSE & DISMISS BAR -->
-      <div class="flex items-center justify-between pt-4 border-t border-slate-800/80 text-xs">
-        <span class="text-slate-500 font-mono">Statement ID: ${draft.id}</span>
+      <div class="flex items-center justify-between pt-3 border-t border-slate-800/80 text-xs">
+        <span class="text-slate-500 font-mono text-[11px]">ID: ${draft.id}</span>
         <button onclick="closeParliamentaryDraftView()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-bold transition border border-slate-700 flex items-center gap-1.5">
           <i class="fa-solid fa-arrow-up"></i>
           <span>Close / Dismiss Statement View</span>
@@ -277,8 +277,50 @@ async function loadSavedDraftsArchive() {
       return;
     }
 
-    container.innerHTML = `
-      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+    // 1. MOBILE RESPONSIVE CARDS VIEW (Visible on screens < 768px)
+    const mobileCardsHtml = `
+      <div class="md:hidden space-y-3">
+        <div class="p-3 bg-slate-900/90 border border-slate-800 rounded-xl flex items-center justify-between">
+          <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-box-archive text-emerald-400"></i>
+            Archived Statements (${drafts.length})
+          </h4>
+          <span class="text-[10px] text-slate-500 font-mono">Immutable Log</span>
+        </div>
+
+        ${drafts.map(d => `
+          <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3 shadow-lg">
+            <div class="flex items-start justify-between gap-2 border-b border-slate-800 pb-2.5">
+              <div>
+                <h4 class="font-bold text-white text-xs">${d.question_no}</h4>
+                <p class="text-[11px] text-slate-400">${d.session} • ${d.house}</p>
+              </div>
+              <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full flex-shrink-0 ${d.approval_status === 'Approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">
+                ${d.approval_status.toUpperCase()}
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-300 font-mono bg-slate-950 p-2.5 rounded-xl border border-slate-800/80">
+              "${d.question_text}"
+            </p>
+
+            <div class="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+              <span>Sign-Off: <strong class="text-slate-300">${d.approved_by ? 'Under Secretary' : 'Pending'}</strong></span>
+            </div>
+
+            <!-- Mobile Full-Width Touch Button -->
+            <button onclick="viewArchivedDraft('${d.id}')" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition shadow flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-eye"></i>
+              <span>View Statement & Annexures</span>
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    // 2. DESKTOP RESPONSIVE TABLE VIEW (Visible on tablets and laptops >= 768px)
+    const desktopTableHtml = `
+      <div class="hidden md:block glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl table-responsive-wrapper">
         <div class="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
           <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
             <i class="fa-solid fa-box-archive text-emerald-400"></i>
@@ -286,7 +328,7 @@ async function loadSavedDraftsArchive() {
           </h4>
           <span class="text-[10px] text-slate-500 font-mono">Immutable Statutory Log</span>
         </div>
-        <table class="w-full text-left text-xs border-collapse">
+        <table class="w-full text-left text-xs border-collapse min-w-[700px]">
           <thead>
             <tr class="bg-slate-900/50 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
               <th class="p-3.5">Reference / Subject</th>
@@ -321,6 +363,9 @@ async function loadSavedDraftsArchive() {
         </table>
       </div>
     `;
+
+    container.innerHTML = mobileCardsHtml + desktopTableHtml;
+
   } catch (err) {
     console.error('Error loading parliamentary archive:', err);
   }
