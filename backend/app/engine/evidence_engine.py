@@ -6,14 +6,18 @@ from ..storage.vector_store import VectorStore
 from ..storage.models import DataConflict, AnomalyRecord
 
 DOC_TYPE_AUTHORITY_RANK = {
-    "Audited Annual Report": 100,
+    "CAG Statutory Audit Report": 100,
     "Final Audited Annual Report": 100,
+    "Standing Committee on Coal Report": 95,
     "Annual Report": 90,
-    "Geological Survey Report": 80,
+    "Joint Stock Measurement / Physical Verification": 85,
+    "Geological Survey & Mine Plan Report": 80,
+    "Quarterly Financial & Production Filing": 70,
+    "Environmental Clearance & Overburden Audit": 60,
     "Monthly Production Report": 50,
     "Provisional Production Report": 30,
-    "Provisional Report": 30,
-    "Unverified Scan": 10
+    "Daily Pit-Head Flash Report": 20,
+    "Unverified Field Memo / Scan": 10
 }
 
 class EvidenceAndConsistencyEngine:
