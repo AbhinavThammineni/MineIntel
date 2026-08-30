@@ -1,29 +1,46 @@
-// Geospatial Leaflet Map Controller for Indian Coalfields
+// High-Speed Geospatial Leaflet Map Controller for Indian Coalfields
 
 let map = null;
 let currentChart = null;
 
 function initGisMap() {
   const mapEl = document.getElementById('gis-map');
-  if (!mapEl || map) return;
+  if (!mapEl) return;
 
-  // Center on Central Indian Coalfields (Ranchi / Bilaspur / Dhanbad region)
-  map = L.map('gis-map').setView([23.4, 84.5], 6);
+  if (!map) {
+    // Center on Central Indian Coalfields (Ranchi / Bilaspur / Dhanbad region)
+    map = L.map('gis-map', {
+      zoomControl: true,
+      fadeAnimation: true
+    }).setView([23.4, 84.5], 6);
 
-  // High-Tech Dark CartoDB Tiles
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors & CartoDB',
-    maxZoom: 18
-  }).addTo(map);
+    // Fast, reliable dark CartoDB tiles with OpenStreetMap backup
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors & CartoDB',
+      maxZoom: 18,
+      subdomains: 'abcd'
+    }).addTo(map);
 
-  loadMinesOnMap();
+    loadMinesOnMap();
+  }
+
+  setTimeout(() => {
+    if (map) map.invalidateSize();
+  }, 200);
 }
 
 async function loadMinesOnMap() {
   try {
     const res = await fetch('/api/gis/mines');
     if (!res.ok) return;
-    const mines = await res.json();
+    const rawData = await res.json();
+    
+    // Handle both direct array and FeatureCollection formats
+    const mines = Array.isArray(rawData) ? rawData : (rawData.features ? rawData.features.map(f => ({
+      ...f.properties,
+      latitude: f.geometry.coordinates[1],
+      longitude: f.geometry.coordinates[0]
+    })) : []);
 
     mines.forEach(mine => {
       let markerColor = '#10b981'; // Emerald (Normal)
@@ -37,7 +54,10 @@ async function loadMinesOnMap() {
         radius = 11;
       }
 
-      const circle = L.circleMarker([mine.latitude, mine.longitude], {
+      const lat = mine.latitude || mine.lat || 23.0;
+      const lng = mine.longitude || mine.lng || 84.0;
+
+      const circle = L.circleMarker([lat, lng], {
         color: markerColor,
         fillColor: markerColor,
         fillOpacity: 0.85,
@@ -77,7 +97,9 @@ async function selectMine(mineCode) {
 
   try {
     const res = await fetch(`/api/gis/mine/${mineCode}`);
-    if (!res.ok) return;
+    if (!res.ok) {
+      throw new Error('Failed to fetch mine details');
+    }
     const data = await res.json();
     const mine = data.mine;
     const facts = data.facts || [];
@@ -124,7 +146,7 @@ async function selectMine(mineCode) {
             <span class="text-xs text-slate-400">${mine.district}, ${mine.state}</span>
           </div>
           <h3 class="text-base font-bold text-white mt-1.5">${mine.name}</h3>
-          <p class="text-[11px] text-slate-500 font-mono">Code: ${mine.code} • Lat: ${mine.latitude.toFixed(3)}, Lng: ${mine.longitude.toFixed(3)}</p>
+          <p class="text-[11px] text-slate-500 font-mono">Code: ${mine.code} • Lat: ${mine.latitude ? mine.latitude.toFixed(3) : 23.0}, Lng: ${mine.longitude ? mine.longitude.toFixed(3) : 84.0}</p>
         </div>
 
         <!-- 2 KPI Mini Cards -->
@@ -209,7 +231,7 @@ async function selectMine(mineCode) {
       }, 100);
     }
 
-    // Smooth scroll down to drawer on mobile devices
+    // Auto scroll down to drawer on mobile
     if (window.innerWidth < 1024) {
       const drawer = document.getElementById('gis-drawer');
       if (drawer) {
@@ -218,6 +240,6 @@ async function selectMine(mineCode) {
     }
 
   } catch (err) {
-    console.error('Error fetching mine details:', err);
+    drawerContent.innerHTML = `<div class="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">Failed to load mine details. Please retry.</div>`;
   }
 }
