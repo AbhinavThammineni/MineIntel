@@ -1,8 +1,57 @@
-// Parliamentary Drafts & Statutory Archive Controller
+// Parliamentary Drafts & RBAC Officer Authentication Controller
+
+let currentOfficerRole = 'analyst'; // 'analyst' (read-only) or 'approver' (authorized)
+let authenticatedOfficerName = 'Under Secretary (Coal Operations), Ministry of Coal';
 
 document.addEventListener('DOMContentLoaded', () => {
   loadSavedDraftsArchive();
 });
+
+function toggleOfficerAuth() {
+  if (currentOfficerRole === 'analyst') {
+    const pin = prompt('🔐 Government e-Sign Gateway\nEnter Official Security PIN to authenticate as Approving Officer (Demo PIN: 1234):');
+    if (pin === '1234') {
+      currentOfficerRole = 'approver';
+      updateAuthUI();
+      alert('✓ Authenticated as: Under Secretary (Coal Operations)\nAuthorization: Statutory Digital Approval & Sign-Off UNLOCKED.');
+    } else if (pin !== null) {
+      alert('❌ Invalid Security PIN. Access denied. (Use Demo PIN: 1234)');
+    }
+  } else {
+    currentOfficerRole = 'analyst';
+    updateAuthUI();
+    alert('Logged out from Approver role. Returned to Analyst (View-Only) mode.');
+  }
+}
+
+function updateAuthUI() {
+  const badge = document.getElementById('officer-role-badge');
+  if (badge) {
+    if (currentOfficerRole === 'approver') {
+      badge.innerHTML = `
+        <span class="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-500/30 transition" onclick="toggleOfficerAuth()">
+          <i class="fa-solid fa-user-shield text-emerald-400"></i>
+          <span>Role: Approving Officer (Authenticated)</span>
+          <i class="fa-solid fa-arrow-right-from-bracket ml-1 text-slate-400 text-[10px]" title="Switch to Analyst"></i>
+        </span>
+      `;
+    } else {
+      badge.innerHTML = `
+        <span class="px-3 py-1.5 bg-slate-900 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:border-emerald-500 transition" onclick="toggleOfficerAuth()">
+          <i class="fa-solid fa-user text-slate-400"></i>
+          <span>Role: Analyst (Read-Only)</span>
+          <span class="text-[10px] text-emerald-400 underline ml-1">[Unlock Approver PIN]</span>
+        </span>
+      `;
+    }
+  }
+
+  // Refresh any currently rendered draft button
+  const currentDraftId = window.activeDraftObj?.id;
+  if (currentDraftId && window.activeDraftObj) {
+    renderParliamentaryDraft(window.activeDraftObj);
+  }
+}
 
 async function generateParliamentaryDraft(e) {
   if (e && e.preventDefault) e.preventDefault();
@@ -35,8 +84,9 @@ async function generateParliamentaryDraft(e) {
     }
 
     const draft = await res.json();
+    window.activeDraftObj = draft;
     renderParliamentaryDraft(draft);
-    loadSavedDraftsArchive(); // Refresh archive list
+    loadSavedDraftsArchive();
 
   } catch (err) {
     container.innerHTML = `
@@ -51,6 +101,7 @@ async function generateParliamentaryDraft(e) {
 function renderParliamentaryDraft(draft) {
   const container = document.getElementById('parliament-draft-container');
   if (!container) return;
+  window.activeDraftObj = draft;
   
   let annexureRows = '';
   if (draft.annexure_table && draft.annexure_table.length > 0) {
@@ -68,7 +119,7 @@ function renderParliamentaryDraft(draft) {
   const isApproved = draft.approval_status === 'Approved';
 
   container.innerHTML = `
-    <div class="glass-card rounded-2xl p-8 shadow-2xl space-y-6 border border-slate-800">
+    <div class="glass-card rounded-2xl p-8 shadow-2xl space-y-6 border border-slate-800 relative animate-in fade-in duration-200">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-5 gap-3">
         <div>
           <div class="flex items-center gap-2">
@@ -80,20 +131,34 @@ function renderParliamentaryDraft(draft) {
           <h3 class="text-lg font-bold text-white mt-1.5">${draft.question_no}: ${draft.question_text}</h3>
         </div>
         
-        <div class="flex items-center space-x-2">
-          ${!isApproved ? `
-            <button onclick="approveDraft('${draft.id}')" class="btn-shimmer px-4 py-2 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-1.5 hover:scale-[1.02]">
-              <i class="fa-solid fa-signature"></i>
-              <span>Approve & Sign-Off</span>
-            </button>
-          ` : `
+        <!-- Action Buttons (RBAC Guarded) -->
+        <div class="flex flex-wrap items-center gap-2">
+          ${!isApproved ? (
+            currentOfficerRole === 'approver' ? `
+              <button onclick="approveDraft('${draft.id}')" class="btn-shimmer px-4 py-2 text-white text-xs font-bold rounded-xl shadow-lg transition flex items-center gap-1.5 hover:scale-[1.02]">
+                <i class="fa-solid fa-signature"></i>
+                <span>Approve & Sign-Off</span>
+              </button>
+            ` : `
+              <button onclick="toggleOfficerAuth()" class="px-3 py-2 bg-slate-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-lock text-amber-400"></i>
+                <span>Sign-Off Locked (Click to Unlock PIN)</span>
+              </button>
+            `
+          ) : `
             <span class="px-3 py-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5">
               <i class="fa-solid fa-circle-check text-emerald-400"></i>
               <span>Signed by: ${draft.approved_by || 'Under Secretary (Coal Operations)'}</span>
             </span>
           `}
+          
           <button onclick="window.print()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition border border-slate-700">
             <i class="fa-solid fa-print mr-1"></i> Print / PDF
+          </button>
+          
+          <!-- Instant Collapse / Close Button -->
+          <button onclick="closeParliamentaryDraftView()" class="px-3 py-2 bg-slate-800 hover:bg-red-500/20 text-slate-400 hover:text-red-400 rounded-xl text-xs font-semibold transition border border-slate-700" title="Collapse Statement">
+            <i class="fa-solid fa-xmark mr-1"></i> Close View
           </button>
         </div>
       </div>
@@ -101,8 +166,8 @@ function renderParliamentaryDraft(draft) {
       <!-- Formal Ministry Laid on Table Statement -->
       <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner relative">
         ${isApproved ? `
-          <div class="absolute top-4 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider">
-            ✓ STATUTORILY APPROVED & SIGNED
+          <div class="absolute top-4 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-seal text-xs"></i> STATUTORILY APPROVED & SIGNED
           </div>
         ` : ''}
 ${draft.drafted_response}
@@ -138,7 +203,20 @@ ${draft.drafted_response}
   `;
 }
 
+function closeParliamentaryDraftView() {
+  const container = document.getElementById('parliament-draft-container');
+  if (container) {
+    container.innerHTML = '';
+    window.activeDraftObj = null;
+  }
+}
+
 async function approveDraft(draftId) {
+  if (currentOfficerRole !== 'approver') {
+    toggleOfficerAuth();
+    return;
+  }
+
   try {
     const res = await fetch('/api/parliament/approve', {
       method: 'POST',
@@ -146,14 +224,13 @@ async function approveDraft(draftId) {
       body: JSON.stringify({
         draft_id: draftId,
         approval_status: 'Approved',
-        approved_by: 'Under Secretary (Coal Operations), Ministry of Coal'
+        approved_by: authenticatedOfficerName
       })
     });
     if (!res.ok) throw new Error('Failed to approve draft on server');
     
-    alert('Parliamentary Statement officially approved and signed into statutory record!');
+    alert('✅ Parliamentary Statement officially approved and digitally signed by Under Secretary!');
     
-    // Reload active draft
     const draftsRes = await fetch('/api/parliament/list');
     if (draftsRes.ok) {
       const drafts = await draftsRes.json();
@@ -214,7 +291,7 @@ async function loadSavedDraftsArchive() {
                 </td>
                 <td class="p-3.5 text-slate-300 text-[11px]">${d.approved_by || '<span class="text-slate-500 italic">Pending Approval</span>'}</td>
                 <td class="p-3.5 text-center">
-                  <button onclick="viewArchivedDraft('${d.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700">
+                  <button onclick="viewArchivedDraft('${d.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700 shadow-sm">
                     <i class="fa-solid fa-eye mr-1"></i> View
                   </button>
                 </td>
@@ -237,7 +314,10 @@ async function viewArchivedDraft(draftId) {
     const draft = drafts.find(d => d.id === draftId);
     if (draft) {
       renderParliamentaryDraft(draft);
-      window.scrollTo({ top: document.getElementById('parliament-draft-container').offsetTop - 80, behavior: 'smooth' });
+      const container = document.getElementById('parliament-draft-container');
+      if (container) {
+        window.scrollTo({ top: container.offsetTop - 80, behavior: 'smooth' });
+      }
     }
   } catch (err) {
     alert('Error loading archived draft: ' + err.message);

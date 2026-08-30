@@ -279,9 +279,13 @@
             </h2>
             <p class="text-xs text-slate-400">Generates formal Ministry of Coal parliamentary replies with strict mathematical grounding, Annexure generation, and human approval workflow.</p>
           </div>
-          <span class="px-2.5 py-1 text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg font-semibold">
-            AI Drafts • Human Approves
-          </span>
+                    <div id="officer-role-badge">
+            <span class="px-3 py-1.5 bg-slate-950 text-slate-300 border border-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:border-emerald-500 transition shadow-sm" onclick="toggleOfficerAuth()">
+              <i class="fa-solid fa-user-shield text-slate-400"></i>
+              <span>Role: Analyst (View-Only)</span>
+              <span class="text-[10px] text-emerald-400 underline ml-1">[Unlock Approver PIN]</span>
+            </span>
+          </div>
         </div>
 
         <form id="parliament-form" onsubmit="generateParliamentaryDraft(event)" class="space-y-4 pt-2">
