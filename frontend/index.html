@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MineIntel — Enterprise Mining Intelligence & Evidence Engine</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Leaflet GIS Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              900: '#14532d'
+            },
+            coal: {
+              800: '#1e293b',
+              900: '#0f172a',
+              950: '#020617'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full text-slate-100 flex flex-col bg-coal-950 font-sans antialiased selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOP HEADER -->
+  <header class="bg-coal-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between shadow-lg">
+    <div class="flex items-center space-x-3.5">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-xl">
+        <i class="fa-solid fa-gem"></i>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center">
+            Mine<span class="text-emerald-400">Intel</span>
+          </h1>
+          <span class="px-2 py-0.5 text-xs font-semibold uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full">v2.0 Verified</span>
+        </div>
+        <p class="text-xs text-slate-400">Deterministic Mining Intelligence & Evidence Verification Platform</p>
+      </div>
+    </div>
+
+    <!-- TRI-STORE & ENGINE STATUS INDICATORS -->
+    <div class="hidden md:flex items-center space-x-3 text-xs">
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300" title="PostgreSQL Structured Facts">
+        <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+        <span class="font-medium text-slate-300">Facts DB</span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300" title="pgvector Semantic Retrieval">
+        <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+        <span class="font-medium text-slate-300">pgvector RAG</span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-slate-300" title="Neo4j Mining Lineage Graph">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="font-medium text-slate-300">Neo4j Graph</span>
+      </div>
+      <div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300">
+        <i class="fa-solid fa-shield-check text-emerald-400"></i>
+        <span class="font-semibold">Evidence Engine Active</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVIGATION TABS -->
+  <nav class="bg-coal-900 border-b border-slate-800 px-6 flex space-x-2 overflow-x-auto select-none">
+    <button onclick="switchTab('qa')" id="tab-btn-qa" class="tab-btn active px-4 py-3 text-sm font-semibold border-b-2 border-emerald-500 text-emerald-400 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-message-check"></i>
+      <span>1. Verified Q&A</span>
+    </button>
+    <button onclick="switchTab('gis')" id="tab-btn-gis" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-map-location-dot"></i>
+      <span>2. GIS Coalfield Map</span>
+    </button>
+    <button onclick="switchTab('reports')" id="tab-btn-reports" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-file-chart-pie"></i>
+      <span>3. Automated Reports</span>
+    </button>
+    <button onclick="switchTab('parliament')" id="tab-btn-parliament" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-landmark"></i>
+      <span>4. Parliamentary Drafts</span>
+    </button>
+    <button onclick="switchTab('conflicts')" id="tab-btn-conflicts" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+      <span>5. Evidence & Conflict Triage</span>
+      <span id="badge-conflict-count" class="ml-1.5 px-1.5 py-0.2 text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 rounded-full font-bold">1</span>
+    </button>
+    <button onclick="switchTab('ingest')" id="tab-btn-ingest" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2 transition">
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+      <span>6. Doc Intelligence Ingest</span>
+    </button>
+  </nav>
+
+  <!-- MAIN VIEW CONTAINER -->
+  <main class="flex-1 overflow-y-auto p-6 bg-coal-950 relative">
+
+    <!-- 1. TAB: VERIFIED Q&A -->
+    <section id="tab-qa" class="tab-content max-w-5xl mx-auto space-y-6">
+      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+              Evidence-Backed Mining Q&A Assistant
+            </h2>
+            <p class="text-xs text-slate-400">All queries execute deterministic math and return verifiable citations with document page & bounding-box highlights.</p>
+          </div>
+          <span class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300">
+            <i class="fa-solid fa-microchip text-emerald-400 mr-1"></i> Deterministic Engine
+          </span>
+        </div>
+
+                <!-- Quick Prompts Chips -->
+        <div class="flex flex-wrap gap-2 pt-2">
+          <span class="text-xs text-slate-400 flex items-center mr-1 font-semibold">Try question:</span>
+          <button onclick="setQuery('What was Mine A\'s production in 2023?')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            📊 1. Production Fact: "Mine A 2023"
+          </button>
+          <button onclick="setQuery('Compare production of all subsidiaries between 2021 and 2025')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            📈 2. Trend & CAGR Matrix
+          </button>
+          <button onclick="setQuery('Why did BCCL production decrease in 2023?')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            🔍 3. Root-Cause: "BCCL decrease 2023"
+          </button>
+          <button onclick="setQuery('What is the overburden removal (MCuM) data across mines?')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            🏔️ 4. Overburden Removal (MCuM)
+          </button>
+          <button onclick="setQuery('Show state-wise coal resource and production allocation')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            🗺️ 5. State-wise Allocation
+          </button>
+          <button onclick="setQuery('Show all detected operational anomalies and root causes')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            ⚠️ 6. Operational Anomalies List
+          </button>
+          <button onclick="setQuery('Show data consistency and conflict resolution audit trail')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            ⚖️ 7. Conflict & Supersession Log
+          </button>
+          <button onclick="setQuery('Provide subsidiary-wise production from 2021-2025 and explain major variations')" class="chip-btn px-3 py-1 text-xs bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-full text-slate-300 transition">
+            🏛️ 8. Parliamentary Reply Draft
+          </button>
+        </div>
+
+        <!-- Input Bar -->
+        <form id="qa-form" onsubmit="handleQuerySubmit(event)" class="relative flex items-center mt-3">
+          <input type="text" id="qa-input" placeholder="Ask any factual, comparative, or root-cause question on Indian coal mining..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 pr-32 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 shadow-inner">
+          <button type="submit" id="qa-submit-btn" class="absolute right-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow-md transition flex items-center gap-2">
+            <span>Query</span>
+            <i class="fa-solid fa-paper-plane text-xs"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- QA Output Feed -->
+      <div id="qa-results" class="space-y-4">
+        <!-- Initial default welcome card -->
+        <div class="bg-coal-900/60 border border-slate-800/80 rounded-2xl p-6 text-center space-y-3">
+          <div class="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-xl">
+            <i class="fa-solid fa-magnifying-glass-location"></i>
+          </div>
+          <h3 class="text-sm font-semibold text-slate-200">The 8-Word Core Architecture Ready</h3>
+          <p class="text-xs text-slate-400 max-w-lg mx-auto">
+            <strong class="text-emerald-400">READ → UNDERSTAND → EXTRACT → CLEAN → STORE → VERIFY → ANSWER → REPORT</strong><br>
+            Submit a query above to trace factual records, inspect bounding boxes on scanned/digital pages, and inspect graph provenance.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. TAB: GIS COALFIELD MAP -->
+    <section id="tab-gis" class="tab-content hidden h-full flex flex-col space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-map-pin text-emerald-400"></i>
+            Geospatial Mine Command & Anomaly Map
+          </h2>
+          <p class="text-xs text-slate-400">Interactive spatial layer showing operational status, production records, anomaly indicators, and data conflict warnings.</p>
+        </div>
+        <div class="flex items-center space-x-3 text-xs">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Normal Production</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500 animate-pulse"></span> Production Anomaly</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span> Data Conflict</span>
+        </div>
+      </div>
+
+      <!-- Map & Drawer Grid -->
+      <div class="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 min-h-[550px]">
+        <div id="gis-map" class="lg:col-span-2 rounded-2xl border border-slate-800 shadow-xl overflow-hidden bg-slate-900 z-10"></div>
+        
+        <!-- Mine Details Slide-over Drawer -->
+        <div id="gis-drawer" class="bg-coal-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between overflow-y-auto">
+          <div id="gis-drawer-content" class="space-y-4">
+            <div class="text-center py-12 text-slate-500 space-y-2">
+              <i class="fa-solid fa-location-crosshairs text-3xl text-slate-600"></i>
+              <p class="text-xs">Click on any mine marker on the map to inspect historical output, anomaly root-causes, and document citations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. TAB: AUTOMATED REPORTS -->
+    <section id="tab-reports" class="tab-content hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-file-invoice text-emerald-400"></i>
+              Automated Production & Verification Report Builder
+            </h2>
+            <p class="text-xs text-slate-400">Compiles Executive Summaries, Production Matrices, Anomalies, and Consistency Logs into an official report.</p>
+          </div>
+          <button onclick="generateReport()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Generate Report</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">Start Period</label>
+            <select id="report-start-year" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+              <option value="2020-21">FY 2020-21</option>
+              <option value="2021-22" selected>FY 2021-22</option>
+              <option value="2022-23">FY 2022-23</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">End Period</label>
+            <select id="report-end-year" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+              <option value="2023-24">FY 2023-24</option>
+              <option value="2024-25" selected>FY 2024-25</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">Subsidiary Filter</label>
+            <select id="report-subsidiary" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+              <option value="">All Subsidiaries (Consolidated CIL)</option>
+              <option value="BCCL">BCCL (Bharat Coking Coal)</option>
+              <option value="SECL">SECL (South Eastern Coalfields)</option>
+              <option value="MCL">MCL (Mahanadi Coalfields)</option>
+              <option value="ECL">ECL (Eastern Coalfields)</option>
+              <option value="CCL">CCL (Central Coalfields)</option>
+              <option value="NCL">NCL (Northern Coalfields)</option>
+              <option value="WCL">WCL (Western Coalfields)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Preview Container -->
+      <div id="report-preview-container" class="space-y-6"></div>
+    </section>
+
+    <!-- 4. TAB: PARLIAMENTARY DRAFTS -->
+    <section id="tab-parliament" class="tab-content hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-landmark-dome text-emerald-400"></i>
+              Parliamentary Question & Draft Statement Engine
+            </h2>
+            <p class="text-xs text-slate-400">Generates formal Ministry of Coal parliamentary replies with strict mathematical grounding, Annexure generation, and human approval workflow.</p>
+          </div>
+          <span class="px-2.5 py-1 text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg font-semibold">
+            AI Drafts • Human Approves
+          </span>
+        </div>
+
+        <form id="parliament-form" onsubmit="generateParliamentaryDraft(event)" class="space-y-4 pt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-slate-300 block mb-1">Question Reference</label>
+              <input type="text" id="parl-q-no" value="Starred Question No. 184" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 block mb-1">Session</label>
+              <input type="text" id="parl-session" value="Monsoon Session 2024" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 block mb-1">House</label>
+              <select id="parl-house" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="Lok Sabha">Lok Sabha</option>
+                <option value="Rajya Sabha">Rajya Sabha</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-300 block mb-1">Parliamentary Question Text</label>
+            <textarea id="parl-q-text" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500">Provide subsidiary-wise coal production of Coal India Limited from 2021 to 2025 and explain the major operational variations and capacity expansion measures.</textarea>
+          </div>
+
+          <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-pen-nib"></i>
+            <span>Draft Parliamentary Statement</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Generated Draft Container -->
+      <div id="parliament-draft-container" class="space-y-6"></div>
+    </section>
+
+    <!-- 5. TAB: EVIDENCE & CONFLICT TRIAGE -->
+    <section id="tab-conflicts" class="tab-content hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-scale-balanced text-amber-400"></i>
+              Evidence Consistency & Conflict Triage Center
+            </h2>
+            <p class="text-xs text-slate-400">Automated Supersession Resolution & Human-in-the-Loop Discrepancy Auditing.</p>
+          </div>
+          <button onclick="triggerEvidenceEngine()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate text-emerald-400"></i>
+            <span>Re-run Evidence Engine</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+          <!-- Supersession Explanation Box -->
+          <div class="bg-slate-950/80 border border-emerald-500/30 rounded-xl p-4 space-y-2">
+            <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Automated Supersession Rule</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              When a <em>Provisional Flash Report</em> conflicts with a <em>Final Audited Annual Report</em> for the same mine, metric, and fiscal year, the system automatically marks the provisional figure as superseded and preserves the audit lineage without false alarm.
+            </p>
+          </div>
+
+          <!-- Genuine Conflict Explanation Box -->
+          <div class="bg-slate-950/80 border border-red-500/30 rounded-xl p-4 space-y-2">
+            <div class="flex items-center space-x-2 text-red-400 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Genuine Conflict Rule</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              When two <em>Authoritative/Final Reports</em> disagree on numbers, the system avoids guessing and raises a <strong>Genuine Conflict Alert</strong> requiring domain officer review.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conflicts List -->
+      <div id="conflicts-list-container" class="space-y-4"></div>
+    </section>
+
+    <!-- 6. TAB: DOC INTELLIGENCE INGEST -->
+    <section id="tab-ingest" class="tab-content hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-file-arrow-up text-emerald-400"></i>
+            Document Intelligence & Extraction Pipeline
+          </h2>
+          <p class="text-xs text-slate-400">Accepts PDFs, Scans, Excel files, and Word documents. Performs OCR/text extraction, metric structuring, unit normalization, and bounding-box tagging.</p>
+        </div>
+
+        <form id="ingest-form" onsubmit="handleDocUpload(event)" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-semibold text-slate-300 block mb-1">Select Document File</label>
+              <input type="file" id="ingest-file" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:bg-emerald-600 file:text-white hover:file:bg-emerald-500">
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-300 block mb-1">Document Authority Classification</label>
+              <select id="ingest-doc-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                <option value="Final Audited Annual Report">Final Audited Annual Report (Rank 100)</option>
+                <option value="Annual Report">Annual Report (Rank 90)</option>
+                <option value="Geological Survey Report">Geological Survey Report (Rank 80)</option>
+                <option value="Monthly Production Report">Monthly Production Report (Rank 50)</option>
+                <option value="Provisional Production Report">Provisional Production Report (Rank 30)</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-semibold rounded-lg shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Ingest & Run Pipeline</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Ingested Documents List -->
+      <div id="ingested-docs-container" class="space-y-4"></div>
+    </section>
+  </main>
+
+  <!-- DOCUMENT EVIDENCE & BOUNDING BOX VIEWER MODAL -->
+  <div id="doc-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-coal-900 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div class="px-6 py-4 bg-coal-800/80 border-b border-slate-700 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-file-certificate"></i>
+          </div>
+          <div>
+            <h3 id="modal-doc-title" class="text-sm font-bold text-white">Document Source Provenance</h3>
+            <p id="modal-doc-subtitle" class="text-xs text-slate-400">Page 17 • Verified Bounding Box Highlight</p>
+          </div>
+        </div>
+        <button onclick="closeDocModal()" class="w-8 h-8 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Simulated Document Page Canvas with Bounding Box Highlight -->
+      <div class="flex-1 overflow-y-auto p-6 bg-slate-950 flex flex-col items-center">
+        <div id="simulated-doc-page" class="relative w-full max-w-2xl bg-white text-slate-900 p-8 rounded-lg shadow-2xl font-mono text-xs leading-relaxed border border-slate-300 min-h-[500px]">
+          <!-- Dynamic Content with Highlighted Span injected by doc_viewer.js -->
+        </div>
+      </div>
+
+      <div class="px-6 py-3 bg-coal-800 border-t border-slate-700 flex items-center justify-between text-xs text-slate-400">
+        <span>Verified by MineIntel Evidence & Consistency Engine</span>
+        <button onclick="closeDocModal()" class="px-4 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFLICT RESOLUTION MODAL -->
+  <div id="resolve-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-coal-900 border border-slate-700 rounded-2xl w-full max-w-xl p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-gavel text-amber-400"></i>
+          Officer Discrepancy Resolution Sign-Off
+        </h3>
+        <button onclick="closeResolveModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-400">Select the canonical verified record and provide justification for the statutory audit log.</p>
+      
+      <div id="resolve-options" class="space-y-2"></div>
+      
+      <div>
+        <label class="text-xs font-semibold text-slate-300 block mb-1">Justification / Resolution Note</label>
+        <textarea id="resolve-notes" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs text-white placeholder-slate-500" placeholder="e.g., Confirmed with Director Technical after Joint Stock Verification."></textarea>
+      </div>
+
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="closeResolveModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs rounded-lg">Cancel</button>
+        <button onclick="submitConflictResolution()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg shadow">Sign-Off & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Scripts -->
+  <script src="/static/js/doc_viewer.js"></script>
+  <script src="/static/js/gis_map.js"></script>
+  <script src="/static/js/report_generator.js"></script>
+  <script src="/static/js/parliament_draft.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

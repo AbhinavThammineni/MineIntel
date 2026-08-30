@@ -1,0 +1,13 @@
+================================================================================
+CIL CONSOLIDATED MARKETING & SALES SUBSIDIARY DISPATCH (EXCEL MATRIX 2023)
+================================================================================
+
+--- PAGE 1 ---
+TABULAR DISPATCH & RUN-OF-MINE SUMMARY:
+Mine Name                | Unit      | FY 2023-24
+---------------------------------------------------
+Mine A Project           | 12,500 KT | (Normalized: 12.5 MT)
+Mine B Project           | 9,000 KT  | (Normalized: 9.0 MT)
+Moonidih Underground    | 1,850 KT  | (Normalized: 1.85 MT)
+Gevra Opencast Project   | 59,000 KT | (Normalized: 59.0 MT)
+Kusmunda Opencast Mine   | 43,000 KT | (Normalized: 43.0 MT)

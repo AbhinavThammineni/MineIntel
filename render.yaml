@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: mineintel-live
+    env: python
+    buildCommand: pip install -r backend/requirements.txt && cd backend && python seed_data.py
+    startCommand: cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    autoDeploy: true

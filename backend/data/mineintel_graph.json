@@ -1,0 +1,1308 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "Coal India Limited",
+      "type": "Organization",
+      "id": "CIL"
+    },
+    {
+      "label": "SECL",
+      "type": "Subsidiary",
+      "id": "SUB_SECL"
+    },
+    {
+      "label": "BCCL",
+      "type": "Subsidiary",
+      "id": "SUB_BCCL"
+    },
+    {
+      "label": "ECL",
+      "type": "Subsidiary",
+      "id": "SUB_ECL"
+    },
+    {
+      "label": "WCL",
+      "type": "Subsidiary",
+      "id": "SUB_WCL"
+    },
+    {
+      "label": "NCL",
+      "type": "Subsidiary",
+      "id": "SUB_NCL"
+    },
+    {
+      "label": "CCL",
+      "type": "Subsidiary",
+      "id": "SUB_CCL"
+    },
+    {
+      "label": "MCL",
+      "type": "Subsidiary",
+      "id": "SUB_MCL"
+    },
+    {
+      "label": "Block II Opencast Mine",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Dhanbad",
+      "lat": 23.812,
+      "lng": 86.215,
+      "id": "MINE_BLOCK2"
+    },
+    {
+      "label": "Kusunda Opencast Mine",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Dhanbad",
+      "lat": 23.778,
+      "lng": 86.412,
+      "id": "MINE_KUSUNDA"
+    },
+    {
+      "label": "Mine A Project",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Dhanbad",
+      "lat": 23.7957,
+      "lng": 86.4304,
+      "id": "MINE_A"
+    },
+    {
+      "label": "Mine B Project",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Dhanbad",
+      "lat": 23.78,
+      "lng": 86.38,
+      "id": "MINE_B"
+    },
+    {
+      "label": "Moonidih Underground Mine",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Dhanbad",
+      "lat": 23.741,
+      "lng": 86.352,
+      "id": "MINE_MOONIDIH"
+    },
+    {
+      "label": "Amrapali Opencast Mine",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Chatra",
+      "lat": 23.821,
+      "lng": 84.982,
+      "id": "MINE_AMRAPALI"
+    },
+    {
+      "label": "Ashoka Opencast Project",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Chatra",
+      "lat": 23.738,
+      "lng": 85.051,
+      "id": "MINE_ASHOKA"
+    },
+    {
+      "label": "Piparwar Opencast Mine",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Chatra",
+      "lat": 23.712,
+      "lng": 85.034,
+      "id": "MINE_PIPARWAR"
+    },
+    {
+      "label": "Rajmahal Opencast Project",
+      "type": "Mine",
+      "state": "Jharkhand",
+      "district": "Godda",
+      "lat": 25.042,
+      "lng": 87.381,
+      "id": "MINE_RAJMAHAL"
+    },
+    {
+      "label": "Sonepur Bazari Project",
+      "type": "Mine",
+      "state": "West Bengal",
+      "district": "Paschim Bardhaman",
+      "lat": 23.682,
+      "lng": 87.214,
+      "id": "MINE_SONEPUR"
+    },
+    {
+      "label": "Bhubaneswari Opencast Mine",
+      "type": "Mine",
+      "state": "Odisha",
+      "district": "Angul",
+      "lat": 20.952,
+      "lng": 85.123,
+      "id": "MINE_BHUBANESWARI"
+    },
+    {
+      "label": "Lakhanpur Opencast Project",
+      "type": "Mine",
+      "state": "Odisha",
+      "district": "Jharsuguda",
+      "lat": 21.758,
+      "lng": 83.821,
+      "id": "MINE_LAKHANPUR"
+    },
+    {
+      "label": "Jayant Opencast Project",
+      "type": "Mine",
+      "state": "Madhya Pradesh",
+      "district": "Singrauli",
+      "lat": 24.112,
+      "lng": 82.645,
+      "id": "MINE_JAYANT"
+    },
+    {
+      "label": "Nigahi Opencast Mine",
+      "type": "Mine",
+      "state": "Madhya Pradesh",
+      "district": "Singrauli",
+      "lat": 24.135,
+      "lng": 82.602,
+      "id": "MINE_NIGAHI"
+    },
+    {
+      "label": "Dipka Opencast Project",
+      "type": "Mine",
+      "state": "Chhattisgarh",
+      "district": "Korba",
+      "lat": 22.315,
+      "lng": 82.551,
+      "id": "MINE_DIPKA"
+    },
+    {
+      "label": "Gevra Opencast Project",
+      "type": "Mine",
+      "state": "Chhattisgarh",
+      "district": "Korba",
+      "lat": 22.348,
+      "lng": 82.593,
+      "id": "MINE_GEVRA"
+    },
+    {
+      "label": "Kusmunda Opencast Mine",
+      "type": "Mine",
+      "state": "Chhattisgarh",
+      "district": "Korba",
+      "lat": 22.321,
+      "lng": 82.682,
+      "id": "MINE_KUSMUNDA"
+    },
+    {
+      "label": "Penganga Opencast Project",
+      "type": "Mine",
+      "state": "Maharashtra",
+      "district": "Chandrapur",
+      "lat": 19.982,
+      "lng": 79.281,
+      "id": "MINE_PENGANGA"
+    },
+    {
+      "label": "Umrer Opencast Mine",
+      "type": "Mine",
+      "state": "Maharashtra",
+      "district": "Nagpur",
+      "lat": 20.852,
+      "lng": 79.324,
+      "id": "MINE_UMRER"
+    },
+    {
+      "label": "Coal Production: 10.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 10.0,
+      "unit": "MT",
+      "fiscal_year": "2020-21",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2020"
+    },
+    {
+      "label": "DOC001_ANNUAL_REPORT_2024",
+      "type": "Document",
+      "doc_type": "Final Audited Annual Report",
+      "id": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "label": "Coal Production: 49.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 49.0,
+      "unit": "MT",
+      "fiscal_year": "2021-22",
+      "is_superseded": false,
+      "id": "FACT_F_GEV_2021"
+    },
+    {
+      "label": "Coal Production: 11.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 11.0,
+      "unit": "MT",
+      "fiscal_year": "2021-22",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2021"
+    },
+    {
+      "label": "Coal Production: 52.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 52.5,
+      "unit": "MT",
+      "fiscal_year": "2022-23",
+      "is_superseded": false,
+      "id": "FACT_F_GEV_2022"
+    },
+    {
+      "label": "Coal Production: 10.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 10.5,
+      "unit": "MT",
+      "fiscal_year": "2022-23",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2022"
+    },
+    {
+      "label": "Coal Production: 8.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 8.0,
+      "unit": "MT",
+      "fiscal_year": "2022-23",
+      "is_superseded": false,
+      "id": "FACT_F_MB_2022"
+    },
+    {
+      "label": "Coal Production: 17.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 17.0,
+      "unit": "MT",
+      "fiscal_year": "2022-23",
+      "is_superseded": false,
+      "id": "FACT_F_RAJ_2022"
+    },
+    {
+      "label": "Coal Production: 31.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 31.0,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_BHU_2023"
+    },
+    {
+      "label": "Coal Production: 59.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 59.0,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_GEV_2023"
+    },
+    {
+      "label": "Coal Production: 43.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 43.0,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_KUS_2023"
+    },
+    {
+      "label": "Coal Production: 12.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 12.5,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2023_AUDITED"
+    },
+    {
+      "label": "Coal Production: 12.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 12.5,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2023_EXCEL"
+    },
+    {
+      "label": "DOC003_MONTHLY_DISPATCH_EXCEL",
+      "type": "Document",
+      "doc_type": "Monthly Production Report",
+      "id": "DOC_DOC003_MONTHLY_DISPATCH_EXCEL"
+    },
+    {
+      "label": "Coal Production: 10.2 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 10.2,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": true,
+      "id": "FACT_F_MA_2023_PROV"
+    },
+    {
+      "label": "DOC002_PROVISIONAL_REPORT_2023",
+      "type": "Document",
+      "doc_type": "Provisional Production Report",
+      "id": "DOC_DOC002_PROVISIONAL_REPORT_2023"
+    },
+    {
+      "label": "Coal Production: 9.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 9.0,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_MB_2023"
+    },
+    {
+      "label": "Coal Production: 1.85 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 1.85,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_MOON_2023_A"
+    },
+    {
+      "label": "Coal Production: 1.4 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 1.4,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_MOON_2023_B"
+    },
+    {
+      "label": "DOC005_STATUTORY_DISCLOSURE",
+      "type": "Document",
+      "doc_type": "Audited Annual Report",
+      "id": "DOC_DOC005_STATUTORY_DISCLOSURE"
+    },
+    {
+      "label": "Coal Production: 9.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 9.5,
+      "unit": "MT",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_RAJ_2023"
+    },
+    {
+      "label": "Coal Production: 35.5 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 35.5,
+      "unit": "MT",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_BHU_2024"
+    },
+    {
+      "label": "Coal Production: 70.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 70.0,
+      "unit": "MT",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_GEV_2024"
+    },
+    {
+      "label": "Coal Production: 50.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 50.0,
+      "unit": "MT",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_KUS_2024"
+    },
+    {
+      "label": "Coal Production: 40.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 40.0,
+      "unit": "MT",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_MA_2024_ANOM"
+    },
+    {
+      "label": "Coal Production: 11.0 MT",
+      "type": "FactRecord",
+      "metric": "Coal Production",
+      "value": 11.0,
+      "unit": "MT",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_MB_2024"
+    },
+    {
+      "label": "Overburden Removal: 38.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 38.0,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_BHU_2023"
+    },
+    {
+      "label": "Overburden Removal: 78.5 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 78.5,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_GEV_2023"
+    },
+    {
+      "label": "Overburden Removal: 45.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 45.0,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_JAY_2023"
+    },
+    {
+      "label": "Overburden Removal: 54.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 54.0,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_KUS_2023"
+    },
+    {
+      "label": "Overburden Removal: 22.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 22.0,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_MA_2023"
+    },
+    {
+      "label": "Overburden Removal: 11.5 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 11.5,
+      "unit": "MCuM",
+      "fiscal_year": "2023-24",
+      "is_superseded": false,
+      "id": "FACT_F_OB_RAJ_2023"
+    },
+    {
+      "label": "Overburden Removal: 44.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 44.0,
+      "unit": "MCuM",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_OB_BHU_2024"
+    },
+    {
+      "label": "Overburden Removal: 92.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 92.0,
+      "unit": "MCuM",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_OB_GEV_2024"
+    },
+    {
+      "label": "Overburden Removal: 65.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 65.0,
+      "unit": "MCuM",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_OB_KUS_2024"
+    },
+    {
+      "label": "Overburden Removal: 68.0 MCuM",
+      "type": "FactRecord",
+      "metric": "Overburden Removal",
+      "value": 68.0,
+      "unit": "MCuM",
+      "fiscal_year": "2024-25",
+      "is_superseded": false,
+      "id": "FACT_F_OB_MA_2024"
+    }
+  ],
+  "edges": [
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_SECL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_BCCL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_ECL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_WCL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_NCL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_CCL"
+    },
+    {
+      "rel": "HAS_SUBSIDIARY",
+      "source": "CIL",
+      "target": "SUB_MCL"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_SECL",
+      "target": "MINE_DIPKA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_SECL",
+      "target": "MINE_GEVRA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_SECL",
+      "target": "MINE_KUSMUNDA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_BCCL",
+      "target": "MINE_BLOCK2"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_BCCL",
+      "target": "MINE_KUSUNDA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_BCCL",
+      "target": "MINE_A"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_BCCL",
+      "target": "MINE_B"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_BCCL",
+      "target": "MINE_MOONIDIH"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_ECL",
+      "target": "MINE_RAJMAHAL"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_ECL",
+      "target": "MINE_SONEPUR"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_WCL",
+      "target": "MINE_PENGANGA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_WCL",
+      "target": "MINE_UMRER"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_NCL",
+      "target": "MINE_JAYANT"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_NCL",
+      "target": "MINE_NIGAHI"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_CCL",
+      "target": "MINE_AMRAPALI"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_CCL",
+      "target": "MINE_ASHOKA"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_CCL",
+      "target": "MINE_PIPARWAR"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_MCL",
+      "target": "MINE_BHUBANESWARI"
+    },
+    {
+      "rel": "OPERATES_MINE",
+      "source": "SUB_MCL",
+      "target": "MINE_LAKHANPUR"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2020-21",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2020"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2021-22",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2021"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2022-23",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2022"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2023_AUDITED"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2023_EXCEL"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2023_PROV"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Coal Production",
+      "source": "MINE_A",
+      "target": "FACT_F_MA_2024_ANOM"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_A",
+      "target": "FACT_F_OB_MA_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Overburden Removal",
+      "source": "MINE_A",
+      "target": "FACT_F_OB_MA_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2022-23",
+      "metric": "Coal Production",
+      "source": "MINE_B",
+      "target": "FACT_F_MB_2022"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_B",
+      "target": "FACT_F_MB_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Coal Production",
+      "source": "MINE_B",
+      "target": "FACT_F_MB_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_MOONIDIH",
+      "target": "FACT_F_MOON_2023_A"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_MOONIDIH",
+      "target": "FACT_F_MOON_2023_B"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2022-23",
+      "metric": "Coal Production",
+      "source": "MINE_RAJMAHAL",
+      "target": "FACT_F_RAJ_2022"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_RAJMAHAL",
+      "target": "FACT_F_RAJ_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_RAJMAHAL",
+      "target": "FACT_F_OB_RAJ_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_BHUBANESWARI",
+      "target": "FACT_F_BHU_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Coal Production",
+      "source": "MINE_BHUBANESWARI",
+      "target": "FACT_F_BHU_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_BHUBANESWARI",
+      "target": "FACT_F_OB_BHU_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Overburden Removal",
+      "source": "MINE_BHUBANESWARI",
+      "target": "FACT_F_OB_BHU_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_JAYANT",
+      "target": "FACT_F_OB_JAY_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2021-22",
+      "metric": "Coal Production",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_GEV_2021"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2022-23",
+      "metric": "Coal Production",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_GEV_2022"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_GEV_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Coal Production",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_GEV_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_OB_GEV_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Overburden Removal",
+      "source": "MINE_GEVRA",
+      "target": "FACT_F_OB_GEV_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Coal Production",
+      "source": "MINE_KUSMUNDA",
+      "target": "FACT_F_KUS_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Coal Production",
+      "source": "MINE_KUSMUNDA",
+      "target": "FACT_F_KUS_2024"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2023-24",
+      "metric": "Overburden Removal",
+      "source": "MINE_KUSMUNDA",
+      "target": "FACT_F_OB_KUS_2023"
+    },
+    {
+      "rel": "HAS_METRIC_FACT",
+      "year": "2024-25",
+      "metric": "Overburden Removal",
+      "source": "MINE_KUSMUNDA",
+      "target": "FACT_F_OB_KUS_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 14,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 140.0,
+        "x1": 480.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_MA_2020",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 45,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 120.0,
+        "x1": 500.0,
+        "y1": 145.0
+      },
+      "source": "FACT_F_GEV_2021",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 15,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 180.0,
+        "x1": 480.0,
+        "y1": 205.0
+      },
+      "source": "FACT_F_MA_2021",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 45,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 150.0,
+        "x1": 500.0,
+        "y1": 175.0
+      },
+      "source": "FACT_F_GEV_2022",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 16,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 210.0,
+        "x1": 480.0,
+        "y1": 235.0
+      },
+      "source": "FACT_F_MA_2022",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 22,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 130.0,
+        "x1": 480.0,
+        "y1": 155.0
+      },
+      "source": "FACT_F_MB_2022",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 78,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 140.0,
+        "x1": 500.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_RAJ_2022",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 62,
+      "bbox": {
+        "x0": 75.0,
+        "y0": 140.0,
+        "x1": 510.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_BHU_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 46,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 180.0,
+        "x1": 500.0,
+        "y1": 205.0
+      },
+      "source": "FACT_F_GEV_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 50,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 150.0,
+        "x1": 490.0,
+        "y1": 175.0
+      },
+      "source": "FACT_F_KUS_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 17,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 250.0,
+        "x1": 510.0,
+        "y1": 278.0
+      },
+      "source": "FACT_F_MA_2023_AUDITED",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "SUPERSEDES",
+      "reason": "Provisional/Interim value (10.2 MT) superseded by Final Audited value (12.5 MT) from DOC001_ANNUAL_REPORT_2024 (Page 17).",
+      "source": "FACT_F_MA_2023_AUDITED",
+      "target": "FACT_F_MA_2023_PROV"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 1,
+      "bbox": {
+        "x0": 80.0,
+        "y0": 110.0,
+        "x1": 420.0,
+        "y1": 135.0
+      },
+      "source": "FACT_F_MA_2023_EXCEL",
+      "target": "DOC_DOC003_MONTHLY_DISPATCH_EXCEL"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 4,
+      "bbox": {
+        "x0": 65.0,
+        "y0": 190.0,
+        "x1": 450.0,
+        "y1": 215.0
+      },
+      "source": "FACT_F_MA_2023_PROV",
+      "target": "DOC_DOC002_PROVISIONAL_REPORT_2023"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 22,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 160.0,
+        "x1": 480.0,
+        "y1": 185.0
+      },
+      "source": "FACT_F_MB_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 35,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 120.0,
+        "x1": 490.0,
+        "y1": 145.0
+      },
+      "source": "FACT_F_MOON_2023_A",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 12,
+      "bbox": {
+        "x0": 80.0,
+        "y0": 210.0,
+        "x1": 500.0,
+        "y1": 235.0
+      },
+      "source": "FACT_F_MOON_2023_B",
+      "target": "DOC_DOC005_STATUTORY_DISCLOSURE"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 79,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 170.0,
+        "x1": 500.0,
+        "y1": 195.0
+      },
+      "source": "FACT_F_RAJ_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 63,
+      "bbox": {
+        "x0": 75.0,
+        "y0": 170.0,
+        "x1": 510.0,
+        "y1": 195.0
+      },
+      "source": "FACT_F_BHU_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 47,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 210.0,
+        "x1": 500.0,
+        "y1": 235.0
+      },
+      "source": "FACT_F_GEV_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 51,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 180.0,
+        "x1": 490.0,
+        "y1": 205.0
+      },
+      "source": "FACT_F_KUS_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 18,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 290.0,
+        "x1": 520.0,
+        "y1": 318.0
+      },
+      "source": "FACT_F_MA_2024_ANOM",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 23,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 190.0,
+        "x1": 480.0,
+        "y1": 215.0
+      },
+      "source": "FACT_F_MB_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 64,
+      "bbox": {
+        "x0": 75.0,
+        "y0": 130.0,
+        "x1": 500.0,
+        "y1": 155.0
+      },
+      "source": "FACT_F_OB_BHU_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 48,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 130.0,
+        "x1": 510.0,
+        "y1": 155.0
+      },
+      "source": "FACT_F_OB_GEV_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 88,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 140.0,
+        "x1": 500.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_OB_JAY_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 52,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 140.0,
+        "x1": 510.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_OB_KUS_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 19,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 140.0,
+        "x1": 500.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_OB_MA_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 80,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 140.0,
+        "x1": 500.0,
+        "y1": 165.0
+      },
+      "source": "FACT_F_OB_RAJ_2023",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 65,
+      "bbox": {
+        "x0": 75.0,
+        "y0": 160.0,
+        "x1": 500.0,
+        "y1": 185.0
+      },
+      "source": "FACT_F_OB_BHU_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 49,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 160.0,
+        "x1": 510.0,
+        "y1": 185.0
+      },
+      "source": "FACT_F_OB_GEV_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 53,
+      "bbox": {
+        "x0": 70.0,
+        "y0": 170.0,
+        "x1": 510.0,
+        "y1": 195.0
+      },
+      "source": "FACT_F_OB_KUS_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    },
+    {
+      "rel": "EVIDENCE_FROM",
+      "page": 20,
+      "bbox": {
+        "x0": 72.0,
+        "y0": 170.0,
+        "x1": 500.0,
+        "y1": 195.0
+      },
+      "source": "FACT_F_OB_MA_2024",
+      "target": "DOC_DOC001_ANNUAL_REPORT_2024"
+    }
+  ]
+}

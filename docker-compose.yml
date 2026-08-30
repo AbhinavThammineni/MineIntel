@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mineintel-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mineintel_live
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    restart: unless-stopped
+    volumes:
+      - ./backend/data:/app/backend/data
