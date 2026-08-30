@@ -355,7 +355,7 @@ async function loadIngestedDocuments() {
               </span>
             </div>
             <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800 text-slate-400">
-              <span>Pages: <strong class="text-white">${d.total_pages}</strong></span>
+              <span>Pages: <strong class="text-white">${d.page_count || d.total_pages || 1}</strong></span>
               <span class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i> Indexed</span>
             </div>
           </div>
@@ -382,7 +382,7 @@ async function loadIngestedDocuments() {
                 <td class="p-3.5 font-bold text-white">${d.title}<br><span class="text-[10px] text-slate-500 font-mono">${d.id}</span></td>
                 <td class="p-3.5 text-center text-slate-400 uppercase font-mono">${d.file_type}</td>
                 <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 text-[10px] font-bold bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full">${d.doc_type}</span></td>
-                <td class="p-3.5 text-center text-slate-300 font-bold">${d.total_pages}</td>
+                <td class="p-3.5 text-center text-slate-300 font-bold">${d.page_count || d.total_pages || 1}</td>
                 <td class="p-3.5 text-center"><span class="text-emerald-400 text-xs font-semibold"><i class="fa-solid fa-circle-check mr-1"></i> Indexed</span></td>
               </tr>
             `).join('')}
