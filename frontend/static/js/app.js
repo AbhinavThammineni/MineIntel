@@ -7,7 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function initApp() {
   loadConflicts();
   loadIngestedDocuments();
-  if (typeof initGisMap === 'function') initGisMap();
 }
 
 function switchTab(tabId) {
@@ -26,8 +25,9 @@ function switchTab(tabId) {
     activeBtn.classList.remove('border-transparent', 'text-slate-400');
   }
 
-  if (tabId === 'gis' && typeof window.map !== 'undefined') {
-    setTimeout(() => { window.map.invalidateSize(); }, 200);
+  // Handle GIS Map display and size invalidation
+  if (tabId === 'gis' && typeof onGisTabActivated === 'function') {
+    onGisTabActivated();
   }
 }
 

@@ -1,35 +1,54 @@
 // High-Speed Geospatial Leaflet Map Controller for Indian Coalfields
 
-let map = null;
+window.mineGisMap = null;
 let currentChart = null;
 
-function initGisMap() {
+function onGisTabActivated() {
   const mapEl = document.getElementById('gis-map');
   if (!mapEl) return;
 
-  if (!map) {
-    // Center on Central Indian Coalfields (Ranchi / Bilaspur / Dhanbad region)
-    map = L.map('gis-map', {
-      zoomControl: true,
-      fadeAnimation: true
-    }).setView([23.4, 84.5], 6);
-
-    // Fast, reliable dark CartoDB tiles with OpenStreetMap backup
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap contributors & CartoDB',
-      maxZoom: 18,
-      subdomains: 'abcd'
-    }).addTo(map);
-
-    loadMinesOnMap();
+  if (!window.mineGisMap) {
+    initGisMap();
   }
 
-  setTimeout(() => {
-    if (map) map.invalidateSize();
-  }, 200);
+  // Multi-pass size invalidation to handle browser layout paint timing
+  [50, 150, 300, 500].forEach(delay => {
+    setTimeout(() => {
+      if (window.mineGisMap) {
+        window.mineGisMap.invalidateSize(true);
+      }
+    }, delay);
+  });
+}
+
+function initGisMap() {
+  const mapEl = document.getElementById('gis-map');
+  if (!mapEl || window.mineGisMap) return;
+
+  try {
+    // Center on Central Indian Coalfields (Ranchi / Bilaspur / Dhanbad region)
+    window.mineGisMap = L.map('gis-map', {
+      zoomControl: true,
+      fadeAnimation: true,
+      zoomAnimation: true
+    }).setView([23.4, 84.5], 6);
+
+    // Reliable Dark Tiles with fallback
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap & CartoDB',
+      maxZoom: 18,
+      subdomains: 'abcd'
+    }).addTo(window.mineGisMap);
+
+    loadMinesOnMap();
+  } catch (err) {
+    console.error('Error initializing Leaflet map:', err);
+  }
 }
 
 async function loadMinesOnMap() {
+  if (!window.mineGisMap) return;
+
   try {
     const res = await fetch('/api/gis/mines');
     if (!res.ok) return;
@@ -44,28 +63,34 @@ async function loadMinesOnMap() {
 
     mines.forEach(mine => {
       let markerColor = '#10b981'; // Emerald (Normal)
-      let radius = 9;
+      let radius = 10;
 
       if (mine.has_conflict) {
         markerColor = '#ef4444'; // Red (Conflict)
-        radius = 12;
+        radius = 13;
       } else if (mine.has_anomaly) {
         markerColor = '#f59e0b'; // Amber (Anomaly)
-        radius = 11;
+        radius = 12;
       }
 
-      const lat = mine.latitude || mine.lat || 23.0;
-      const lng = mine.longitude || mine.lng || 84.0;
+      const lat = parseFloat(mine.latitude || mine.lat || 23.0);
+      const lng = parseFloat(mine.longitude || mine.lng || 84.0);
 
       const circle = L.circleMarker([lat, lng], {
-        color: markerColor,
+        color: '#ffffff',
         fillColor: markerColor,
-        fillOpacity: 0.85,
+        fillOpacity: 0.9,
         radius: radius,
         weight: 2
-      }).addTo(map);
+      }).addTo(window.mineGisMap);
 
-      circle.bindTooltip(`<strong>${mine.name}</strong><br>${mine.subsidiary} • ${mine.state}`, {
+      circle.bindTooltip(`
+        <div class="font-sans text-xs">
+          <strong class="text-white">${mine.name}</strong><br>
+          <span class="text-emerald-400 font-semibold">${mine.subsidiary}</span> • ${mine.state}<br>
+          <span class="text-slate-300">Output: ${mine.latest_production || 0} MT</span>
+        </div>
+      `, {
         className: 'custom-popup'
       });
 

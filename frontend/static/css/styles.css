@@ -45,8 +45,8 @@ font-mono, code, pre {
 .nav-scroll-container {
   display: flex;
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -96,23 +96,53 @@ font-mono, code, pre {
   border-radius: 4px;
 }
 
-/* Mobile Touch Buttons */
+/* Touch Buttons */
 button, input, select, textarea {
   touch-action: manipulation;
 }
 
-/* Leaflet Map on Mobile */
+/* Explicit GIS Map Dimensions & Leaflet Fix */
 #gis-map {
-  min-height: 380px;
-  height: 100%;
-  width: 100%;
+  height: 540px !important;
+  min-height: 450px !important;
+  width: 100% !important;
+  border-radius: 1rem;
+  background: #0b1120;
+  position: relative;
+  z-index: 1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   #gis-map {
-    min-height: 320px;
-    height: 320px;
+    height: 420px !important;
+    min-height: 380px !important;
   }
+}
+
+@media (max-width: 640px) {
+  #gis-map {
+    height: 350px !important;
+    min-height: 320px !important;
+  }
+}
+
+.leaflet-container {
+  background: #030712 !important;
+  font-family: inherit;
+}
+
+/* Leaflet Customization */
+.custom-popup .leaflet-popup-content-wrapper {
+  background: #0b1120;
+  color: #f8fafc;
+  border: 1px solid #334155;
+  border-radius: 14px;
+  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.7);
+  padding: 2px;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: #0b1120;
 }
 
 /* Shimmer Button Effect */
