@@ -1,4 +1,5 @@
 // High-Speed Geospatial Leaflet Map Controller for Indian Coalfields
+// Using 100% Free, No-API-Key Esri Dark Canvas & OpenStreetMap Tiles
 
 window.mineGisMap = null;
 let currentChart = null;
@@ -33,11 +34,16 @@ function initGisMap() {
       zoomAnimation: true
     }).setView([23.4, 84.5], 6);
 
-    // Reliable Dark Tiles with fallback
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap & CartoDB',
-      maxZoom: 18,
-      subdomains: 'abcd'
+    // 100% Free Esri World Dark Gray Base (No API Key Required, Fast Global CDN)
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri, DeLorme, NAVTEQ',
+      maxZoom: 16
+    }).addTo(window.mineGisMap);
+
+    // Add Esri Dark Labels Layer for high-contrast district and city names
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '',
+      maxZoom: 16
     }).addTo(window.mineGisMap);
 
     loadMinesOnMap();
