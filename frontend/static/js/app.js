@@ -1,16 +1,24 @@
-let activeConflictId = null;
+// MineIntel Core Frontend Controller
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadConflicts();
-  loadDocuments();
+  initApp();
 });
 
+function initApp() {
+  loadConflicts();
+  loadIngestedDocuments();
+  if (typeof initGisMap === 'function') initGisMap();
+}
+
 function switchTab(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.remove('active', 'border-emerald-500', 'text-emerald-400');
-    btn.classList.add('border-transparent', 'text-slate-400');
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(el => {
+    el.classList.remove('active', 'border-emerald-500', 'text-emerald-400');
+    el.classList.add('border-transparent', 'text-slate-400');
   });
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+  const activeContent = document.getElementById(`tab-${tabId}`);
+  if (activeContent) activeContent.classList.remove('hidden');
 
   const activeBtn = document.getElementById(`tab-btn-${tabId}`);
   if (activeBtn) {
@@ -18,36 +26,36 @@ function switchTab(tabId) {
     activeBtn.classList.remove('border-transparent', 'text-slate-400');
   }
 
-  const activeContent = document.getElementById(`tab-${tabId}`);
-  if (activeContent) activeContent.classList.remove('hidden');
-
-  if (tabId === 'gis') {
-    initGISMap();
-  } else if (tabId === 'reports') {
-    generateReport();
-  } else if (tabId === 'conflicts') {
-    loadConflicts();
-  } else if (tabId === 'ingest') {
-    loadDocuments();
+  if (tabId === 'gis' && typeof window.map !== 'undefined') {
+    setTimeout(() => { window.map.invalidateSize(); }, 200);
   }
 }
 
-function setQuery(text) {
-  document.getElementById('qa-input').value = text;
-  document.getElementById('qa-form').dispatchEvent(new Event('submit'));
+function setQuery(queryText) {
+  const input = document.getElementById('qa-input');
+  if (input) {
+    input.value = queryText;
+    switchTab('qa');
+    const form = document.getElementById('qa-form');
+    if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  }
 }
 
 async function handleQuerySubmit(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) e.preventDefault();
   const input = document.getElementById('qa-input');
-  const query = input.value.trim();
+  const query = input?.value?.trim();
   if (!query) return;
 
-  const feed = document.getElementById('qa-results');
-  const submitBtn = document.getElementById('qa-submit-btn');
+  const resultsContainer = document.getElementById('qa-results');
+  if (!resultsContainer) return;
 
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin text-xs"></i>';
+  resultsContainer.innerHTML = `
+    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3 border border-slate-800">
+      <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-3xl"></i>
+      <p class="text-xs">Querying PostgreSQL facts, searching pgvector semantic passages, and retrieving bounding box provenance...</p>
+    </div>
+  `;
 
   try {
     const res = await fetch('/api/qa/query', {
@@ -55,227 +63,267 @@ async function handleQuerySubmit(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: query })
     });
-    const data = await res.json();
 
-    let citationsHtml = '';
-    if (data.citations && data.citations.length > 0) {
-      citationsHtml = `
-        <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-2">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Verifiable Evidence Citations</span>
-          <div class="flex flex-wrap gap-2">
-            ${data.citations.map(c => `
-              <button onclick="openDocModal('${c.doc_id}', ${c.page_number}, '${(c.snippet || '').replace(/'/g, "\\'")}', ${JSON.stringify(c.bbox || {})})" class="px-3 py-1.5 bg-emerald-950/60 hover:bg-emerald-900 border border-emerald-500/40 text-emerald-300 text-xs rounded-lg transition font-medium flex items-center gap-2 shadow-sm">
-                <i class="fa-solid fa-file-certificate text-emerald-400"></i>
-                <span>${c.doc_id} • Page ${c.page_number}</span>
-                <span class="px-1.5 py-0.2 bg-emerald-500/20 text-emerald-300 text-[10px] rounded">${Math.round(c.confidence * 100)}% verified</span>
-              </button>
-            `).join('')}
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server returned error (${res.status}): ${errText}`);
+    }
+
+    const data = await res.json();
+    renderQaResponse(data, query);
+  } catch (err) {
+    resultsContainer.innerHTML = `
+      <div class="p-6 bg-red-500/10 border border-red-500/30 rounded-2xl text-xs text-red-400 space-y-2">
+        <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-circle-exclamation"></i> Query Execution Error</div>
+        <p>${err.message}</p>
+      </div>
+    `;
+  }
+}
+
+function renderQaResponse(data, originalQuery) {
+  const container = document.getElementById('qa-results');
+  if (!container) return;
+
+  let citationsHtml = '';
+  if (data.citations && data.citations.length > 0) {
+    citationsHtml = data.citations.map(c => `
+      <div class="p-3.5 bg-slate-950/80 rounded-xl border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-file-pdf"></i> ${c.doc_id}
+          </span>
+          <span class="px-2 py-0.5 text-[10px] bg-slate-800 text-slate-300 rounded font-medium">Page ${c.page_number}</span>
+        </div>
+        <p class="text-xs text-slate-300 italic font-mono bg-slate-900/60 p-2.5 rounded-lg border border-slate-800/80">"${c.snippet || 'Verified data record'}"</p>
+        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+          <span>Confidence: <strong class="text-slate-300">${((c.confidence || 0.99) * 100).toFixed(0)}%</strong></span>
+          <button onclick="openDocModal('${c.doc_id}', ${c.page_number}, '${encodeURIComponent(JSON.stringify(c.bbox || {}))}', '${encodeURIComponent(c.snippet || '')}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-semibold transition border border-slate-700">
+            <i class="fa-solid fa-magnifying-glass mr-1"></i> Inspect Bounding Box
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  let notesHtml = '';
+  if (data.notes && data.notes.length > 0) {
+    notesHtml = data.notes.map(n => `
+      <div class="p-3 bg-blue-950/40 border border-blue-600/30 rounded-xl text-xs text-blue-300 flex items-start gap-2.5">
+        <i class="fa-solid fa-circle-info text-blue-400 mt-0.5"></i>
+        <span>${n}</span>
+      </div>
+    `).join('');
+  }
+
+  container.innerHTML = `
+    <div class="glass-card rounded-2xl p-7 shadow-2xl space-y-5 border border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-2">
+        <span class="text-xs text-slate-400 font-medium flex items-center gap-2">
+          <i class="fa-solid fa-user-circle text-slate-500"></i> Query: "${originalQuery}"
+        </span>
+        <span class="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full">
+          Intent: ${data.query_type}
+        </span>
+      </div>
+
+      <!-- Markdown Formatted / Rich Answer Content -->
+      <div class="text-xs text-slate-200 leading-relaxed space-y-3">
+        ${renderMarkdownText(data.answer)}
+      </div>
+
+      ${notesHtml}
+
+      <!-- Verified Provenance Citations Section -->
+      ${citationsHtml ? `
+        <div class="space-y-2.5 pt-2 border-t border-slate-800">
+          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-award text-emerald-400"></i> Verified Statutory Citations & Bounding Boxes
+          </h4>
+          <div class="grid grid-cols-1 gap-2.5">
+            ${citationsHtml}
           </div>
         </div>
-      `;
+      ` : ''}
+    </div>
+  `;
+}
+
+function renderMarkdownText(txt) {
+  if (!txt) return '';
+  let html = txt
+    .replace(/^### (.*$)/gim, '<h3 class="text-sm font-bold text-white mt-2 mb-1">$1</h3>')
+    .replace(/^## (.*$)/gim, '<h2 class="text-base font-bold text-white mt-3 mb-1">$1</h2>')
+    .replace(/\*\*(.*?)\*\*/gim, '<strong class="text-white font-bold">$1</strong>')
+    .replace(/\*(.*?)\*/gim, '<em class="text-slate-300">$1</em>');
+
+  // Convert markdown tables to styled HTML tables
+  if (html.includes('|')) {
+    const lines = html.split('\n');
+    let inTable = false;
+    let tableHtml = '<div class="overflow-x-auto my-3 border border-slate-800 rounded-xl bg-slate-950"><table class="w-full text-left text-xs border-collapse">';
+    let resultLines = [];
+
+    for (let line of lines) {
+      if (line.trim().startsWith('|')) {
+        if (!inTable) {
+          inTable = true;
+          tableHtml = '<div class="overflow-x-auto my-3 border border-slate-800 rounded-xl bg-slate-950"><table class="w-full text-left text-xs border-collapse">';
+        }
+        if (line.includes(':---') || line.includes('---:')) {
+          continue; // skip divider
+        }
+        const cells = line.split('|').filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        const isHeader = !tableHtml.includes('<tbody>');
+        if (isHeader) {
+          tableHtml += '<thead class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider"><tr>';
+          cells.forEach(c => { tableHtml += `<th class="p-3">${c.trim()}</th>`; });
+          tableHtml += '</tr></thead><tbody>';
+        } else {
+          tableHtml += '<tr class="hover:bg-slate-800/40 border-b border-slate-800/50">';
+          cells.forEach(c => { tableHtml += `<td class="p-3 text-slate-200">${c.trim()}</td>`; });
+          tableHtml += '</tr>';
+        }
+      } else {
+        if (inTable) {
+          inTable = false;
+          tableHtml += '</tbody></table></div>';
+          resultLines.push(tableHtml);
+        }
+        if (line.trim()) resultLines.push(`<p class="my-1">${line}</p>`);
+      }
     }
-
-    let notesHtml = '';
-    if (data.notes && data.notes.length > 0) {
-      notesHtml = data.notes.map(n => `<div class="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 p-2.5 rounded-lg mt-2">${n}</div>`).join('');
+    if (inTable) {
+      tableHtml += '</tbody></table></div>';
+      resultLines.push(tableHtml);
     }
-
-    const card = document.createElement('div');
-    card.className = 'bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3 animate-in fade-in duration-300';
-    card.innerHTML = `
-      <div class="flex items-center justify-between">
-        <span class="px-2.5 py-1 text-xs font-semibold bg-slate-800 text-slate-300 rounded-lg">Query: "${data.query}"</span>
-        <span class="text-[11px] text-emerald-400 font-bold uppercase tracking-wider"><i class="fa-solid fa-check-double mr-1"></i> Deterministic Verified</span>
-      </div>
-      <div class="text-sm text-slate-100 leading-relaxed font-sans prose prose-invert">
-        ${data.answer.replace(/\n/g, '<br>')}
-      </div>
-      ${notesHtml}
-      ${citationsHtml}
-    `;
-
-    feed.prepend(card);
-
-  } catch (err) {
-    alert('Query failed: ' + err.message);
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>Query</span> <i class="fa-solid fa-paper-plane text-xs"></i>';
+    return resultLines.join('');
   }
+
+  return `<p class="whitespace-pre-wrap">${html}</p>`;
 }
 
 async function loadConflicts() {
   const container = document.getElementById('conflicts-list-container');
+  if (!container) return;
+
   try {
     const res = await fetch('/api/conflicts/list');
+    if (!res.ok) return;
     const conflicts = await res.json();
 
-    const countBadge = document.getElementById('badge-conflict-count');
-    const underReviewCount = conflicts.filter(c => c.status === 'under_review').length;
-    if (countBadge) countBadge.innerText = underReviewCount;
+    const badge = document.getElementById('badge-conflict-count');
+    if (badge) {
+      const activeCount = conflicts.filter(c => c.status === 'under_review').length;
+      badge.textContent = activeCount;
+      badge.className = activeCount > 0 
+        ? 'ml-1.5 px-2 py-0.5 text-[10px] bg-red-500/20 text-red-400 border border-red-500/40 rounded-full font-extrabold shadow-sm'
+        : 'ml-1.5 px-2 py-0.5 text-[10px] bg-slate-800 text-slate-400 rounded-full font-medium';
+    }
 
     if (conflicts.length === 0) {
-      container.innerHTML = `<div class="p-8 bg-coal-900 border border-slate-800 rounded-2xl text-center text-xs text-slate-400">All multi-document records are consistent. Zero discrepancies detected.</div>`;
+      container.innerHTML = `<div class="p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center text-xs text-slate-400">All multi-document statutory records are reconciled and consistent.</div>`;
       return;
     }
 
-    container.innerHTML = conflicts.map(c => {
-      const isGenuine = c.conflict_type === 'genuine_conflict';
-      const isResolved = c.status === 'resolved';
-
-      return `
-        <div class="bg-coal-900 border ${isGenuine && !isResolved ? 'border-red-500/40' : 'border-slate-800'} rounded-2xl p-6 shadow-xl space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2.5">
-              <span class="px-2.5 py-1 text-xs font-bold rounded-lg ${isGenuine ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'}">
-                ${c.conflict_type === 'superseded_discrepancy' ? 'Superseded Discrepancy' : 'Genuine Conflict (Human Review)'}
-              </span>
-              <h3 class="text-sm font-bold text-white">${c.mine_name} • ${c.metric} (${c.fiscal_year})</h3>
-            </div>
-            <span class="text-xs text-slate-400 font-mono">Discrepancy Δ: <strong>${c.discrepancy_delta} MT</strong></span>
-          </div>
-
-          <p class="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800">${c.resolution_notes}</p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            ${c.records_involved.map(r => `
-              <div class="p-3 bg-slate-950/80 rounded-xl border border-slate-800 space-y-1.5">
-                <div class="flex justify-between text-[11px]">
-                  <span class="font-bold text-white">${r.doc_id} (Page ${r.page_number})</span>
-                  <span class="text-emerald-400 font-bold">${r.normalized_value} ${r.normalized_unit}</span>
-                </div>
-                <p class="text-[11px] text-slate-400">${r.doc_type}</p>
-                <button onclick="openDocModal('${r.doc_id}', ${r.page_number}, '${(r.raw_text || '').replace(/'/g, "\\'")}')" class="text-[10px] text-emerald-400 hover:underline flex items-center gap-1 font-semibold">
-                  <i class="fa-solid fa-file-lines"></i> View Original Text
-                </button>
-              </div>
+    container.innerHTML = `
+      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <th class="p-3.5">Entity / Metric</th>
+              <th class="p-3.5 text-center">Variance (Delta)</th>
+              <th class="p-3.5 text-center">Classification</th>
+              <th class="p-3.5 text-center">Status</th>
+              <th class="p-3.5">Resolution Trail</th>
+              <th class="p-3.5 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-200">
+            ${conflicts.map(c => `
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-3.5 font-bold text-white">${c.mine_name}<br><span class="text-[11px] font-normal text-slate-400">${c.metric} (${c.fiscal_year})</span></td>
+                <td class="p-3.5 text-center font-mono font-bold ${c.discrepancy_delta > 1.0 ? 'text-rose-400' : 'text-amber-400'}">${c.discrepancy_delta} MT</td>
+                <td class="p-3.5 text-center text-slate-300 text-[11px]">${c.conflict_type === 'superseded_discrepancy' ? 'Supersession' : 'Genuine Conflict'}</td>
+                <td class="p-3.5 text-center">
+                  <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ${c.status === 'superseded' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                    ${c.status.toUpperCase()}
+                  </span>
+                </td>
+                <td class="p-3.5 text-slate-300 text-[11px] max-w-xs leading-relaxed">${c.resolution_notes}</td>
+                <td class="p-3.5 text-center">
+                  ${c.status === 'under_review' ? `
+                    <button onclick="openResolveModal('${c.id}', '${c.mine_name}', '${c.metric}', '${c.fiscal_year}')" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition shadow-sm">
+                      Resolve
+                    </button>
+                  ` : `
+                    <span class="text-slate-500 text-xs"><i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Audited</span>
+                  `}
+                </td>
+              </tr>
             `).join('')}
-          </div>
-
-          ${isGenuine && !isResolved ? `
-            <div class="flex justify-end pt-2">
-              <button onclick="openResolveModal('${c.id}', ${JSON.stringify(c.records_involved).replace(/"/g, '&quot;')})" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
-                <i class="fa-solid fa-gavel"></i>
-                <span>Resolve Discrepancy</span>
-              </button>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }).join('');
-
+          </tbody>
+        </table>
+      </div>
+    `;
   } catch (err) {
-    console.error('Failed to load conflicts:', err);
+    console.error('Error loading conflicts:', err);
   }
 }
 
-function openResolveModal(conflictId, records) {
-  activeConflictId = conflictId;
-  const modal = document.getElementById('resolve-modal');
-  const optContainer = document.getElementById('resolve-options');
-
-  optContainer.innerHTML = records.map((r, idx) => `
-    <label class="flex items-center space-x-3 p-3 bg-slate-950 border border-slate-800 rounded-xl cursor-pointer hover:border-emerald-500">
-      <input type="radio" name="chosen_record" value="${r.id}" ${idx === 0 ? 'checked' : ''} class="text-emerald-500 focus:ring-emerald-500">
-      <div class="text-xs">
-        <span class="font-bold text-white">${r.normalized_value} ${r.normalized_unit}</span>
-        <span class="text-slate-400 ml-2">from ${r.doc_id} (Page ${r.page_number})</span>
-      </div>
-    </label>
-  `).join('');
-
-  modal.classList.remove('hidden');
-}
-
-function closeResolveModal() {
-  document.getElementById('resolve-modal').classList.add('hidden');
-  activeConflictId = null;
-}
-
-async function submitConflictResolution() {
-  if (!activeConflictId) return;
-  const chosenInput = document.querySelector('input[name="chosen_record"]:checked');
-  const notes = document.getElementById('resolve-notes').value.trim() || 'Resolved following officer audit review.';
+async function loadIngestedDocuments() {
+  const container = document.getElementById('ingested-docs-container');
+  if (!container) return;
 
   try {
-    const res = await fetch('/api/conflicts/resolve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        conflict_id: activeConflictId,
-        chosen_record_id: chosenInput.value,
-        resolution_notes: notes,
-        resolved_by: 'Director (Coal Statistics)'
-      })
-    });
-    closeResolveModal();
-    alert('Discrepancy resolved and Fact Store audit history updated!');
-    loadConflicts();
+    const res = await fetch('/api/ingest/documents');
+    if (!res.ok) return;
+    const docs = await res.json();
+
+    if (docs.length === 0) {
+      container.innerHTML = `<div class="p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center text-xs text-slate-400">No documents ingested yet.</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <th class="p-3.5">Document Title / ID</th>
+              <th class="p-3.5 text-center">Type</th>
+              <th class="p-3.5 text-center">Authority Classification</th>
+              <th class="p-3.5 text-center">Pages</th>
+              <th class="p-3.5 text-center">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-200">
+            ${docs.map(d => `
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-3.5 font-bold text-white">${d.title}<br><span class="text-[10px] text-slate-500 font-mono">${d.id}</span></td>
+                <td class="p-3.5 text-center text-slate-400 uppercase font-mono">${d.file_type}</td>
+                <td class="p-3.5 text-center"><span class="px-2.5 py-0.5 text-[10px] font-bold bg-blue-500/10 border border-blue-500/30 text-blue-400 rounded-full">${d.doc_type}</span></td>
+                <td class="p-3.5 text-center text-slate-300 font-bold">${d.total_pages}</td>
+                <td class="p-3.5 text-center"><span class="text-emerald-400 text-xs font-semibold"><i class="fa-solid fa-circle-check mr-1"></i> Indexed</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
   } catch (err) {
-    alert('Failed to resolve conflict: ' + err.message);
+    console.error('Error loading documents:', err);
   }
 }
 
 async function triggerEvidenceEngine() {
   try {
-    const res = await fetch('/api/conflicts/trigger_evidence_engine', { method: 'POST' });
-    const data = await res.json();
-    alert('Evidence & Consistency Engine completed successfully!');
-    loadConflicts();
+    const res = await fetch('/api/conflicts/trigger', { method: 'POST' });
+    if (res.ok) {
+      alert('Evidence Consistency Engine executed: all cross-document supersessions and genuine conflicts re-evaluated.');
+      loadConflicts();
+    }
   } catch (err) {
-    alert('Failed: ' + err.message);
-  }
-}
-
-async function handleDocUpload(e) {
-  e.preventDefault();
-  const fileInput = document.getElementById('ingest-file');
-  const docType = document.getElementById('ingest-doc-type').value;
-  if (!fileInput.files[0]) return;
-
-  const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
-  formData.append('doc_type', docType);
-
-  try {
-    const res = await fetch('/api/ingest/upload', {
-      method: 'POST',
-      body: formData
-    });
-    const result = await res.json();
-    alert(`Document ${result.filename} ingested! Extracted ${result.facts_extracted_count} structured facts with bounding boxes.`);
-    loadDocuments();
-    fileInput.value = '';
-  } catch (err) {
-    alert('Upload failed: ' + err.message);
-  }
-}
-
-async function loadDocuments() {
-  const container = document.getElementById('ingested-docs-container');
-  try {
-    const res = await fetch('/api/ingest/documents');
-    const docs = await res.json();
-
-    container.innerHTML = `
-      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <h3 class="text-sm font-bold text-white">Ingested Document Repository (${docs.length} Authority Sources)</h3>
-        <div class="divide-y divide-slate-800 text-xs">
-          ${docs.map(d => `
-            <div class="py-3 flex items-center justify-between">
-              <div>
-                <p class="font-bold text-slate-200">${d.title || d.filename}</p>
-                <p class="text-slate-400 text-[11px]">${d.doc_type} • ID: ${d.id} • ${d.page_count} Pages</p>
-              </div>
-              <button onclick="openDocModal('${d.id}', 1, 'Inspecting Document ${d.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition border border-slate-700 text-xs">
-                Inspect Pages
-              </button>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  } catch (err) {
-    console.error('Failed to load docs:', err);
+    alert('Error running evidence engine: ' + err.message);
   }
 }
