@@ -1,3 +1,9 @@
+// Parliamentary Drafts & Statutory Archive Controller
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSavedDraftsArchive();
+});
+
 async function generateParliamentaryDraft(e) {
   if (e && e.preventDefault) e.preventDefault();
   
@@ -30,6 +36,7 @@ async function generateParliamentaryDraft(e) {
 
     const draft = await res.json();
     renderParliamentaryDraft(draft);
+    loadSavedDraftsArchive(); // Refresh archive list
 
   } catch (err) {
     container.innerHTML = `
@@ -66,7 +73,7 @@ function renderParliamentaryDraft(draft) {
         <div>
           <div class="flex items-center gap-2">
             <span class="px-3 py-0.5 text-[11px] font-bold ${isApproved ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'} rounded-full">
-              Status: ${draft.approval_status}
+              Status: ${draft.approval_status.toUpperCase()}
             </span>
             <span class="text-xs text-slate-400 font-medium">${draft.session} • ${draft.house}</span>
           </div>
@@ -82,14 +89,22 @@ function renderParliamentaryDraft(draft) {
           ` : `
             <span class="px-3 py-1.5 bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-semibold flex items-center gap-1.5">
               <i class="fa-solid fa-circle-check text-emerald-400"></i>
-              <span>Officially Signed by: ${draft.approved_by || 'Under Secretary (Coal Operations)'}</span>
+              <span>Signed by: ${draft.approved_by || 'Under Secretary (Coal Operations)'}</span>
             </span>
           `}
+          <button onclick="window.print()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition border border-slate-700">
+            <i class="fa-solid fa-print mr-1"></i> Print / PDF
+          </button>
         </div>
       </div>
 
       <!-- Formal Ministry Laid on Table Statement -->
-      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner">
+      <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 font-mono text-xs text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner relative">
+        ${isApproved ? `
+          <div class="absolute top-4 right-4 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold rounded-lg uppercase tracking-wider">
+            ✓ STATUTORILY APPROVED & SIGNED
+          </div>
+        ` : ''}
 ${draft.drafted_response}
       </div>
 
@@ -136,13 +151,95 @@ async function approveDraft(draftId) {
     });
     if (!res.ok) throw new Error('Failed to approve draft on server');
     
-    alert('✅ Parliamentary Statement officially approved and signed into statutory record!');
+    alert('Parliamentary Statement officially approved and signed into statutory record!');
+    
+    // Reload active draft
     const draftsRes = await fetch('/api/parliament/list');
     if (draftsRes.ok) {
       const drafts = await draftsRes.json();
-      if (drafts.length > 0) renderParliamentaryDraft(drafts[0]);
+      const current = drafts.find(d => d.id === draftId) || drafts[0];
+      if (current) renderParliamentaryDraft(current);
     }
+    loadSavedDraftsArchive();
   } catch (err) {
     alert('Failed to approve draft: ' + err.message);
+  }
+}
+
+async function loadSavedDraftsArchive() {
+  const container = document.getElementById('parl-archive-container');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/parliament/list');
+    if (!res.ok) return;
+    const drafts = await res.json();
+
+    if (!drafts || drafts.length === 0) {
+      container.innerHTML = `<div class="p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center text-xs text-slate-400">No previous parliamentary drafts archived yet.</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="glass-card rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+        <div class="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
+          <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-box-archive text-emerald-400"></i>
+            Archived & Approved Parliamentary Drafts Repository (${drafts.length})
+          </h4>
+          <span class="text-[10px] text-slate-500 font-mono">Immutable Statutory Log</span>
+        </div>
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-900/50 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
+              <th class="p-3.5">Reference / Subject</th>
+              <th class="p-3.5 text-center">Session / House</th>
+              <th class="p-3.5 text-center">Approval Status</th>
+              <th class="p-3.5">Sign-Off Officer</th>
+              <th class="p-3.5 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800 text-slate-200">
+            ${drafts.map(d => `
+              <tr class="hover:bg-slate-800/40">
+                <td class="p-3.5">
+                  <div class="font-bold text-white">${d.question_no}</div>
+                  <div class="text-[11px] text-slate-400 truncate max-w-sm">${d.question_text}</div>
+                </td>
+                <td class="p-3.5 text-center text-slate-300">${d.session}<br><span class="text-[10px] text-slate-500 font-semibold">${d.house}</span></td>
+                <td class="p-3.5 text-center">
+                  <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full ${d.approval_status === 'Approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}">
+                    ${d.approval_status.toUpperCase()}
+                  </span>
+                </td>
+                <td class="p-3.5 text-slate-300 text-[11px]">${d.approved_by || '<span class="text-slate-500 italic">Pending Approval</span>'}</td>
+                <td class="p-3.5 text-center">
+                  <button onclick="viewArchivedDraft('${d.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-emerald-400 hover:text-white rounded-lg text-xs font-bold transition border border-slate-700">
+                    <i class="fa-solid fa-eye mr-1"></i> View
+                  </button>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error loading parliamentary archive:', err);
+  }
+}
+
+async function viewArchivedDraft(draftId) {
+  try {
+    const res = await fetch('/api/parliament/list');
+    if (!res.ok) return;
+    const drafts = await res.json();
+    const draft = drafts.find(d => d.id === draftId);
+    if (draft) {
+      renderParliamentaryDraft(draft);
+      window.scrollTo({ top: document.getElementById('parliament-draft-container').offsetTop - 80, behavior: 'smooth' });
+    }
+  } catch (err) {
+    alert('Error loading archived draft: ' + err.message);
   }
 }
