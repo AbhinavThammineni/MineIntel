@@ -1,168 +1,223 @@
-let gisMap = null;
+// Geospatial Leaflet Map Controller for Indian Coalfields
+
+let map = null;
 let currentChart = null;
 
-function initGISMap() {
-  if (gisMap) {
-    setTimeout(() => { gisMap.invalidateSize(); }, 200);
-    return;
-  }
+function initGisMap() {
+  const mapEl = document.getElementById('gis-map');
+  if (!mapEl || map) return;
 
-  gisMap = L.map('gis-map').setView([22.8, 84.5], 6);
+  // Center on Central Indian Coalfields (Ranchi / Bilaspur / Dhanbad region)
+  map = L.map('gis-map').setView([23.4, 84.5], 6);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+  // High-Tech Dark CartoDB Tiles
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors & CartoDB',
     maxZoom: 18
-  }).addTo(gisMap);
+  }).addTo(map);
 
-  loadGISData();
+  loadMinesOnMap();
 }
 
-async function loadGISData() {
+async function loadMinesOnMap() {
   try {
     const res = await fetch('/api/gis/mines');
-    const data = await res.json();
+    if (!res.ok) return;
+    const mines = await res.json();
 
-    data.features.forEach(f => {
-      const p = f.properties;
-      const [lng, lat] = f.geometry.coordinates;
+    mines.forEach(mine => {
+      let markerColor = '#10b981'; // Emerald (Normal)
+      let radius = 9;
 
-      let color = '#22c55e';
-      let pulseClass = '';
-      if (p.has_conflict) {
-        color = '#ef4444';
-        pulseClass = 'pulsing-conflict';
-      } else if (p.has_anomaly) {
-        color = '#f59e0b';
-        pulseClass = 'pulsing-marker';
+      if (mine.has_conflict) {
+        markerColor = '#ef4444'; // Red (Conflict)
+        radius = 12;
+      } else if (mine.has_anomaly) {
+        markerColor = '#f59e0b'; // Amber (Anomaly)
+        radius = 11;
       }
 
-      const marker = L.circleMarker([lat, lng], {
-        radius: p.has_conflict ? 10 : (p.has_anomaly ? 9 : 7),
-        fillColor: color,
-        color: '#ffffff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.9,
-        className: pulseClass
-      }).addTo(gisMap);
+      const circle = L.circleMarker([mine.latitude, mine.longitude], {
+        color: markerColor,
+        fillColor: markerColor,
+        fillOpacity: 0.85,
+        radius: radius,
+        weight: 2
+      }).addTo(map);
 
-      marker.bindTooltip(`<strong>${p.name}</strong><br><span class="text-xs text-slate-300">${p.subsidiary} • ${p.latest_production} ${p.unit}</span>`, {
+      circle.bindTooltip(`<strong>${mine.name}</strong><br>${mine.subsidiary} • ${mine.state}`, {
         className: 'custom-popup'
       });
 
-      marker.on('click', () => {
-        showMineDrawer(p);
+      circle.on('click', () => {
+        selectMine(mine.code);
       });
     });
 
+    // Auto-select Gevra by default for showcase
+    if (mines.length > 0) {
+      const defaultMine = mines.find(m => m.code === 'MINE_GEVRA') || mines[0];
+      selectMine(defaultMine.code);
+    }
   } catch (err) {
-    console.error('Failed to load GIS mines:', err);
+    console.error('Error loading mines on map:', err);
   }
 }
 
-function showMineDrawer(props) {
-  const drawer = document.getElementById('gis-drawer-content');
-  
-  let anomalyHtml = '';
-  if (props.has_anomaly && props.anomaly_detail) {
-    const a = props.anomaly_detail;
-    anomalyHtml = `
-      <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 space-y-1">
-        <div class="flex items-center justify-between text-amber-400 text-xs font-bold">
-          <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Production Anomaly (${a.fiscal_year})</span>
-          <span>${a.deviation_pct > 0 ? '+' : ''}${a.deviation_pct}%</span>
-        </div>
-        <p class="text-xs text-slate-300">${a.explanation}</p>
-        <button onclick="openDocModal('${a.supporting_doc_id}', ${a.supporting_page}, '${a.explanation.replace(/'/g, "\\'")}')" class="text-[11px] text-emerald-400 hover:underline flex items-center gap-1 mt-1 font-semibold">
-          <i class="fa-solid fa-file-lines"></i> View Document Note (Page ${a.supporting_page})
-        </button>
-      </div>
-    `;
-  }
+async function selectMine(mineCode) {
+  const drawerContent = document.getElementById('gis-drawer-content');
+  if (!drawerContent) return;
 
-  let conflictHtml = '';
-  if (props.has_conflict && props.conflict_detail) {
-    const c = props.conflict_detail;
-    conflictHtml = `
-      <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 space-y-1">
-        <div class="flex items-center justify-between text-red-400 text-xs font-bold">
-          <span><i class="fa-solid fa-circle-exclamation mr-1"></i> Genuine Data Conflict</span>
-          <span>Δ ${c.discrepancy_delta} MT</span>
-        </div>
-        <p class="text-xs text-slate-300">Conflicting numbers detected across statutory filings. Requires human sign-off.</p>
-        <button onclick="switchTab('conflicts')" class="text-[11px] text-red-400 hover:underline font-bold mt-1 block">
-          Go to Triage Center →
-        </button>
-      </div>
-    `;
-  }
-
-  drawer.innerHTML = `
-    <div class="space-y-3">
-      <div>
-        <span class="px-2 py-0.5 text-[10px] font-bold bg-slate-800 border border-slate-700 text-emerald-400 rounded">${props.subsidiary}</span>
-        <h3 class="text-base font-bold text-white mt-1">${props.name}</h3>
-        <p class="text-xs text-slate-400">${props.district}, ${props.state} • ${props.mine_type}</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-2 bg-slate-950 p-3 rounded-xl border border-slate-800">
-        <div>
-          <span class="text-[10px] text-slate-500 uppercase font-semibold">Latest Output</span>
-          <p class="text-sm font-bold text-emerald-400">${props.latest_production} ${props.unit}</p>
-        </div>
-        <div>
-          <span class="text-[10px] text-slate-500 uppercase font-semibold">Fiscal Year</span>
-          <p class="text-sm font-bold text-slate-200">${props.latest_fiscal_year}</p>
-        </div>
-      </div>
-
-      ${anomalyHtml}
-      ${conflictHtml}
-
-      <div>
-        <h4 class="text-xs font-semibold text-slate-300 mb-2">Historical Production Trajectory</h4>
-        <div class="bg-slate-950 p-2 rounded-xl border border-slate-800 h-44">
-          <canvas id="mine-history-chart"></canvas>
-        </div>
-      </div>
-
-      <button onclick="openDocModal('DOC001_ANNUAL_REPORT_2024', 17, '${props.name} produced ${props.latest_production} ${props.unit} of coal.')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg transition border border-slate-700 flex items-center justify-center gap-2">
-        <i class="fa-solid fa-file-certificate text-emerald-400"></i>
-        <span>Inspect Source Bounding Box</span>
-      </button>
+  drawerContent.innerHTML = `
+    <div class="py-12 text-center text-slate-400 space-y-2">
+      <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-2xl"></i>
+      <p class="text-xs">Loading factual telemetry and historical records...</p>
     </div>
   `;
 
-  const years = Object.keys(props.yearly_production || {});
-  const values = Object.values(props.yearly_production || {});
-  
-  const ctx = document.getElementById('mine-history-chart');
-  if (ctx && years.length > 0) {
-    if (currentChart) currentChart.destroy();
-    currentChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: years,
-        datasets: [{
-          label: 'Production (MT)',
-          data: values,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 4,
-          pointBackgroundColor: '#10b981'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } }
+  try {
+    const res = await fetch(`/api/gis/mine/${mineCode}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const mine = data.mine;
+    const facts = data.facts || [];
+    const obFacts = data.overburden_facts || [];
+    const anomalies = data.anomalies || [];
+    const conflicts = data.conflicts || [];
+
+    const latestFact = facts.length > 0 ? facts[facts.length - 1] : null;
+    const latestOb = obFacts.length > 0 ? obFacts[obFacts.length - 1] : null;
+
+    let anomalyBadge = '';
+    if (anomalies.length > 0) {
+      const a = anomalies[0];
+      anomalyBadge = `
+        <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-1">
+          <div class="font-bold text-amber-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Statistical Anomaly: ${a.deviation_pct > 0 ? '+' : ''}${a.deviation_pct}%</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">${a.explanation}</p>
+        </div>
+      `;
+    }
+
+    let conflictBadge = '';
+    if (conflicts.length > 0) {
+      const c = conflicts[0];
+      conflictBadge = `
+        <div class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-xs space-y-1">
+          <div class="font-bold text-red-400 flex items-center gap-1.5">
+            <i class="fa-solid fa-scale-unbalanced"></i>
+            <span>Data Discrepancy (Delta: ${c.discrepancy_delta} MT)</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">${c.resolution_notes}</p>
+        </div>
+      `;
+    }
+
+    drawerContent.innerHTML = `
+      <div class="space-y-4 animate-in fade-in duration-200">
+        <div class="border-b border-slate-800 pb-3">
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-0.5 text-[10px] font-bold bg-slate-800 text-emerald-400 border border-slate-700 rounded-full">${mine.subsidiary}</span>
+            <span class="text-xs text-slate-400">${mine.district}, ${mine.state}</span>
+          </div>
+          <h3 class="text-base font-bold text-white mt-1.5">${mine.name}</h3>
+          <p class="text-[11px] text-slate-500 font-mono">Code: ${mine.code} • Lat: ${mine.latitude.toFixed(3)}, Lng: ${mine.longitude.toFixed(3)}</p>
+        </div>
+
+        <!-- 2 KPI Mini Cards -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Latest Output</span>
+            <p class="text-base font-bold text-emerald-400 mt-0.5">${latestFact ? `${latestFact.normalized_value} MT` : 'N/A'}</p>
+            <span class="text-[9px] text-slate-500">${latestFact ? latestFact.fiscal_year : ''}</span>
+          </div>
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Overburden Vol</span>
+            <p class="text-base font-bold text-teal-400 mt-0.5">${latestOb ? `${latestOb.normalized_value} MCuM` : 'N/A'}</p>
+            <span class="text-[9px] text-slate-500">${latestOb ? latestOb.fiscal_year : 'Stripping'}</span>
+          </div>
+        </div>
+
+        ${anomalyBadge}
+        ${conflictBadge}
+
+        <!-- Mini Production Trajectory Chart -->
+        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+          <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
+            <i class="fa-solid fa-chart-area text-emerald-400"></i> Production Trajectory
+          </span>
+          <div class="h-36">
+            <canvas id="mine-history-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Verified Citation & Bounding Box Action -->
+        ${latestFact ? `
+          <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-bold text-emerald-400"><i class="fa-solid fa-file-pdf mr-1"></i> ${latestFact.doc_id}</span>
+              <span class="text-slate-400">Page ${latestFact.page_number}</span>
+            </div>
+            <button onclick="openDocModal('${latestFact.doc_id}', ${latestFact.page_number}, '${encodeURIComponent(JSON.stringify(latestFact.bbox || {}))}', '${encodeURIComponent(latestFact.raw_text || '')}')" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 border border-slate-700 shadow-sm">
+              <i class="fa-solid fa-magnifying-glass text-emerald-400"></i>
+              <span>Inspect Bounding Box</span>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+
+    // Render Chart.js
+    if (facts.length > 0) {
+      setTimeout(() => {
+        const ctx = document.getElementById('mine-history-chart');
+        if (ctx) {
+          if (currentChart) currentChart.destroy();
+          const labels = facts.map(f => f.fiscal_year);
+          const values = facts.map(f => f.normalized_value);
+
+          currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Output (MT)',
+                data: values,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                fill: true,
+                tension: 0.35,
+                borderWidth: 2,
+                pointBackgroundColor: '#10b981',
+                pointRadius: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { display: false } },
+                y: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: '#1e293b' } }
+              }
+            }
+          });
         }
+      }, 100);
+    }
+
+    // Smooth scroll down to drawer on mobile devices
+    if (window.innerWidth < 1024) {
+      const drawer = document.getElementById('gis-drawer');
+      if (drawer) {
+        drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
-    });
+    }
+
+  } catch (err) {
+    console.error('Error fetching mine details:', err);
   }
 }

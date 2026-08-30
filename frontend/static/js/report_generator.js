@@ -1,11 +1,15 @@
+// Automated Reports Generator with Responsive Mobile Tables
+
 async function generateReport() {
-  const startYear = document.getElementById('report-start-year').value;
-  const endYear = document.getElementById('report-end-year').value;
-  const subsidiary = document.getElementById('report-subsidiary').value;
+  const startYear = document.getElementById('report-start-year')?.value || '2021-22';
+  const endYear = document.getElementById('report-end-year')?.value || '2024-25';
+  const subsidiary = document.getElementById('report-subsidiary')?.value || '';
   const container = document.getElementById('report-preview-container');
 
+  if (!container) return;
+
   container.innerHTML = `
-    <div class="bg-coal-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400 space-y-3">
+    <div class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3 border border-slate-800">
       <i class="fa-solid fa-circle-notch fa-spin text-emerald-400 text-3xl"></i>
       <p class="text-xs">Aggregating multi-source factual records, computing deterministic CAGR, and compiling all 6 statutory report sections...</p>
     </div>
@@ -16,6 +20,11 @@ async function generateReport() {
     if (subsidiary) url += `&subsidiary=${encodeURIComponent(subsidiary)}`;
 
     const res = await fetch(url);
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Server returned error (${res.status}): ${errText}`);
+    }
+
     const rep = await res.json();
 
     // Section 2: Production & CAGR Matrix
@@ -23,10 +32,10 @@ async function generateReport() {
     const matrixSec = rep.sections.find(s => s.table_type === 'subsidiary_matrix');
     if (matrixSec && matrixSec.data) {
       matrixHtml = `
-        <div class="overflow-x-auto my-3">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper my-2">
+          <table class="w-full text-left text-xs border-collapse min-w-[550px]">
             <thead>
-              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">Subsidiary</th>
                 <th class="p-3 text-center">Start (${startYear})</th>
                 <th class="p-3 text-center">End (${endYear})</th>
@@ -55,10 +64,10 @@ async function generateReport() {
     const obSec = rep.sections.find(s => s.table_type === 'overburden_matrix');
     if (obSec && obSec.data && obSec.data.length > 0) {
       obHtml = `
-        <div class="overflow-x-auto my-3">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper my-2">
+          <table class="w-full text-left text-xs border-collapse min-w-[550px]">
             <thead>
-              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">Mine Name</th>
                 <th class="p-3 text-center">Subsidiary</th>
                 <th class="p-3 text-center">Period</th>
@@ -87,14 +96,14 @@ async function generateReport() {
     const stateSec = rep.sections.find(s => s.table_type === 'state_allocation');
     if (stateSec && stateSec.data && stateSec.data.length > 0) {
       stateHtml = `
-        <div class="overflow-x-auto my-3">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper my-2">
+          <table class="w-full text-left text-xs border-collapse min-w-[500px]">
             <thead>
-              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">State</th>
-                <th class="p-3 text-center">Estimated Reserves (BT)</th>
+                <th class="p-3 text-center">Reserves (BT)</th>
                 <th class="p-3 text-center">Latest Output (MT)</th>
-                <th class="p-3 text-center">National Share (%)</th>
+                <th class="p-3 text-center">Share (%)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-800 text-slate-200">
@@ -117,10 +126,10 @@ async function generateReport() {
     const anomSec = rep.sections.find(s => s.table_type === 'anomalies_list');
     if (anomSec && anomSec.data && anomSec.data.length > 0) {
       anomHtml = `
-        <div class="overflow-x-auto my-3">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper my-2">
+          <table class="w-full text-left text-xs border-collapse min-w-[550px]">
             <thead>
-              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">Mine Project</th>
                 <th class="p-3 text-center">Subsidiary</th>
                 <th class="p-3 text-center">Period</th>
@@ -149,14 +158,14 @@ async function generateReport() {
     const confSec = rep.sections.find(s => s.table_type === 'conflict_audit');
     if (confSec && confSec.data && confSec.data.length > 0) {
       confHtml = `
-        <div class="overflow-x-auto my-3">
-          <table class="w-full text-left text-xs border-collapse">
+        <div class="table-responsive-wrapper my-2">
+          <table class="w-full text-left text-xs border-collapse min-w-[550px]">
             <thead>
-              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider">
+              <tr class="bg-slate-950 border-b border-slate-800 text-slate-400 uppercase tracking-wider text-[11px]">
                 <th class="p-3">Mine Entity</th>
-                <th class="p-3 text-center">Classification</th>
-                <th class="p-3 text-center">Variance (Δ)</th>
-                <th class="p-3 text-center">Audit Status</th>
+                <th class="p-3 text-center">Type</th>
+                <th class="p-3 text-center">Delta (Δ)</th>
+                <th class="p-3 text-center">Status</th>
                 <th class="p-3">Resolution & Audit Log</th>
               </tr>
             </thead>
@@ -177,69 +186,82 @@ async function generateReport() {
     }
 
     container.innerHTML = `
-      <div class="bg-coal-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-5 gap-3">
+      <div class="glass-card rounded-2xl p-4 sm:p-8 shadow-2xl space-y-5 border border-slate-800">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-2">
           <div>
-            <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded">CONFIDENTIAL STATUTORY AUDIT</span>
-            <h3 class="text-xl font-bold text-white mt-1">${rep.title}</h3>
-            <p class="text-xs text-slate-400">Generated: ${rep.generated_at} • Parameters: ${rep.parameters.subsidiary} (${rep.parameters.start_year} to ${rep.parameters.end_year})</p>
+            <span class="px-2 py-0.5 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded">STATUTORY AUDIT</span>
+            <h3 class="text-base sm:text-xl font-bold text-white mt-1">${rep.title}</h3>
+            <p class="text-[11px] text-slate-400">${rep.parameters.subsidiary} (${rep.parameters.start_year} to ${rep.parameters.end_year})</p>
           </div>
-          <div class="flex space-x-2">
-            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg font-medium transition">
-              <i class="fa-solid fa-print mr-1"></i> Print / PDF
-            </button>
-          </div>
+          <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs rounded-lg font-medium transition self-start sm:self-auto">
+            <i class="fa-solid fa-print mr-1"></i> Print / PDF
+          </button>
         </div>
 
-        <!-- 4 Key Summary KPI Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">Start Output (${startYear})</span>
-            <p class="text-lg font-bold text-slate-200 mt-1">${rep.summary_metrics.start_total_mt.toFixed(2)} MT</p>
+        <!-- 4 Summary KPI Cards (Responsive Grid) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+          <div class="bg-slate-950 p-3 sm:p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Start (${startYear})</span>
+            <p class="text-base sm:text-lg font-bold text-slate-200 mt-1">${rep.summary_metrics.start_total_mt.toFixed(1)} MT</p>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">End Output (${endYear})</span>
-            <p class="text-lg font-bold text-emerald-400 mt-1">${rep.summary_metrics.end_total_mt.toFixed(2)} MT</p>
+          <div class="bg-slate-950 p-3 sm:p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">End (${endYear})</span>
+            <p class="text-base sm:text-lg font-bold text-emerald-400 mt-1">${rep.summary_metrics.end_total_mt.toFixed(1)} MT</p>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">Overall Growth</span>
-            <p class="text-lg font-bold text-emerald-400 mt-1">+${rep.summary_metrics.growth_pct}%</p>
+          <div class="bg-slate-950 p-3 sm:p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Growth</span>
+            <p class="text-base sm:text-lg font-bold text-emerald-400 mt-1">+${rep.summary_metrics.growth_pct}%</p>
           </div>
-          <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <span class="text-[10px] text-slate-500 uppercase font-semibold">Total Overburden</span>
-            <p class="text-lg font-bold text-teal-400 mt-1">${(rep.summary_metrics.total_ob_mcum || 0).toFixed(1)} MCuM</p>
+          <div class="bg-slate-950 p-3 sm:p-4 rounded-xl border border-slate-800">
+            <span class="text-[10px] text-slate-500 uppercase font-semibold">Overburden</span>
+            <p class="text-base sm:text-lg font-bold text-teal-400 mt-1">${(rep.summary_metrics.total_ob_mcum || 0).toFixed(1)} MCuM</p>
           </div>
         </div>
 
         <!-- All 6 Sections Rendered Sequentially -->
-        <div class="space-y-6 text-xs text-slate-300 leading-relaxed">
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-lines text-emerald-400"></i> 1. Executive Summary</h4>
+        <div class="space-y-5 text-xs text-slate-300 leading-relaxed">
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-file-lines text-emerald-400"></i> 1. Executive Summary</h4>
             <p>${rep.sections[0].content}</p>
           </div>
 
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-table text-emerald-400"></i> 2. Subsidiary Production & CAGR Matrix</h4>
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-table text-emerald-400"></i> 2. Subsidiary Production & CAGR Matrix</h4>
+              <span class="text-[9px] text-slate-500 sm:hidden">Swipe table ➔</span>
+            </div>
             ${matrixHtml}
           </div>
 
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-mountain text-emerald-400"></i> 3. Geotechnical & Overburden Removal (MCuM) Summary</h4>
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-mountain text-emerald-400"></i> 3. Overburden Removal (MCuM)</h4>
+              <span class="text-[9px] text-slate-500 sm:hidden">Swipe table ➔</span>
+            </div>
             ${obHtml}
           </div>
 
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> 4. State-wise Resource & Production Allocation</h4>
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-emerald-400"></i> 4. State-wise Allocation</h4>
+              <span class="text-[9px] text-slate-500 sm:hidden">Swipe table ➔</span>
+            </div>
             ${stateHtml}
           </div>
 
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-400"></i> 5. Detected Operational Anomalies & Root Causes</h4>
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-400"></i> 5. Operational Anomalies & Root Causes</h4>
+              <span class="text-[9px] text-slate-500 sm:hidden">Swipe table ➔</span>
+            </div>
             ${anomHtml}
           </div>
 
-          <div class="bg-slate-950 p-5 rounded-xl border border-slate-800 space-y-2">
-            <h4 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-400"></i> 6. Data Consistency & Conflict Resolution Audit Trail</h4>
+          <div class="bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-emerald-400"></i> 6. Data Consistency & Conflict Audit Log</h4>
+              <span class="text-[9px] text-slate-500 sm:hidden">Swipe table ➔</span>
+            </div>
             ${confHtml}
           </div>
         </div>
@@ -247,6 +269,6 @@ async function generateReport() {
     `;
 
   } catch (err) {
-    container.innerHTML = `<div class="p-6 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">Failed to generate report: ${err.message}</div>`;
+    container.innerHTML = `<div class="p-4 sm:p-6 bg-red-500/10 border border-red-500/30 rounded-xl text-xs text-red-400">Failed to generate report: ${err.message}</div>`;
   }
 }
