@@ -1,6 +1,7 @@
 import re
 import json
-from typing import Dict, Any, List, Optional
+import difflib
+from typing import Dict, Any, List, Optional, Tuple
 from ..storage.fact_store import FactStore
 from ..storage.vector_store import VectorStore
 from ..storage.graph_store import MiningGraphStore
@@ -8,6 +9,26 @@ from ..engine.analytics_engine import DeterministicAnalyticsEngine
 
 def is_word_in(words: List[str], text: str) -> bool:
     return any(re.search(r'\b' + re.escape(w) + r'\b', text, re.IGNORECASE) for w in words)
+
+DOMAIN_VOCABULARY = [
+    # Metrics & Actions
+    "production", "overburden", "average", "percentage", "percent", "proportion", "share",
+    "comparison", "compare", "growth", "anomalies", "anomaly", "conflict", "conflicts",
+    "supersession", "superseded", "parliament", "parliamentary", "starred", "unstarred",
+    "underground", "opencast", "decrease", "decline", "increase", "reason", "reasons",
+    "downtime", "subsidiary", "subsidiaries", "reserves", "least", "lowest", "highest",
+    "largest", "most", "total", "overall", "national", "annual", "fiscal", "stripping",
+    "geological", "output", "dispatch", "mining", "mines", "mine", "tonnes", "million",
+    # Subsidiaries
+    "secl", "mcl", "ncl", "ccl", "ecl", "bccl", "wcl", "cil",
+    # Mine Names
+    "gevra", "kusmunda", "dipka", "lakhanpur", "bhubaneswari", "jayant", "nigahi",
+    "amrapali", "ashoka", "piparwar", "rajmahal", "sonepur", "bazari", "kusunda",
+    "moonidih", "penganga", "umrer",
+    # States & Districts
+    "jharkhand", "odisha", "chhattisgarh", "maharashtra", "bengal",
+    "dhanbad", "korba", "chatra", "singrauli", "jharsuguda", "angul", "godda", "nagpur"
+]
 
 class QueryRouter:
     def __init__(self, fact_store: Optional[FactStore] = None, vector_store: Optional[VectorStore] = None, graph_store: Optional[MiningGraphStore] = None):
@@ -19,14 +40,36 @@ class QueryRouter:
         self.subsidiaries = ["SECL", "MCL", "NCL", "CCL", "ECL", "BCCL", "WCL", "CIL"]
         self.states = ["Jharkhand", "Odisha", "Chhattisgarh", "Madhya Pradesh", "Maharashtra", "West Bengal"]
 
+    def auto_correct_query(self, query: str) -> Tuple[str, Dict[str, str]]:
+        words = re.findall(r'[a-zA-Z]+|\d+(?:-\d+)?|[^\w\s]', query)
+        corrected_words = []
+        corrections = {}
+        
+        for w in words:
+            w_lower = w.lower()
+            # Ignore short words (e.g. "in", "of", "a") and numbers
+            if len(w) >= 4 and w_lower not in DOMAIN_VOCABULARY and not re.match(r'^\d', w):
+                matches = difflib.get_close_matches(w_lower, DOMAIN_VOCABULARY, n=1, cutoff=0.72)
+                if matches:
+                    matched = matches[0]
+                    # Preserve capitalization if original was capitalized
+                    fixed = matched.upper() if w.isupper() else (matched.title() if w.istitle() else matched)
+                    corrected_words.append(fixed)
+                    corrections[w] = fixed
+                    continue
+            corrected_words.append(w)
+            
+        corrected_query = " ".join(corrected_words)
+        corrected_query = re.sub(r'\s+([?,.!])', r'\1', corrected_query)
+        corrected_query = re.sub(r'([0-9])\s*-\s*([0-9])', r'\1-\2', corrected_query)
+        return corrected_query, corrections
+
     def _extract_fiscal_year(self, text: str) -> Optional[str]:
-        # Match 2021-2022 or 2021-22
         m_full = re.search(r'20(2[0-5])[-/](?:20)?(2[1-6])', text)
         if m_full:
             y1 = m_full.group(1)
             y2 = m_full.group(2)
             return f"20{y1}-{y2}"
-        # Match 4-digit standalone year 2020-2025
         m4 = re.search(r'20(2[0-5])', text)
         if m4:
             yr = int(m4.group(1))
@@ -62,72 +105,88 @@ class QueryRouter:
         return matched_sub, matched_mine, matched_state
 
     def process_query(self, query_text: str) -> Dict[str, Any]:
-        q_lower = query_text.lower()
-        matched_sub, matched_mine, matched_state = self._match_entities(query_text)
+        # Pre-process with fuzzy auto-correction
+        normalized_query, corrections = self.auto_correct_query(query_text)
+        q_lower = normalized_query.lower()
+        matched_sub, matched_mine, matched_state = self._match_entities(normalized_query)
         
         # 1. Overburden Removal (MCuM) Query
         if any(w in q_lower for w in ["overburden", "mcum", "ob removal", "geotechnical overburden", "stripping"]):
-            return self._handle_overburden_query(query_text)
+            res = self._handle_overburden_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
             
         # 2. State-wise Resource Distribution Query
         if any(w in q_lower for w in ["state-wise", "state wise", "state allocation", "state production", "resource allocation", "reserves by state"]):
-            return self._handle_state_allocation_query(query_text)
+            res = self._handle_state_allocation_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 3. Specific State Query (e.g., "mines in Jharkhand", "mines in Odisha")
         if matched_state and any(w in q_lower for w in ["mines in", "projects in", "coalfields in", "production in", "list mines"]):
-            return self._handle_state_mines_query(query_text, matched_state)
+            res = self._handle_state_mines_query(normalized_query, matched_state)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 4. Operational Anomalies Query
         if any(w in q_lower for w in ["anomalies", "operational anomalies", "all anomalies", "list anomalies", "anomalous", "spike and drop"]):
-            return self._handle_anomalies_list_query(query_text)
+            res = self._handle_anomalies_list_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
             
         # 5. Consistency & Conflict Audit Trail Query
         if any(w in q_lower for w in ["conflict audit", "audit trail", "consistency log", "supersessions list", "conflicts list", "superseded"]):
-            return self._handle_conflict_audit_query(query_text)
+            res = self._handle_conflict_audit_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
             
         # 6. Parliamentary Drafting Query
         if any(w in q_lower for w in ["parliament", "lok sabha", "rajya sabha", "starred question", "unstarred question", "parliamentary draft"]):
-            return self._handle_parliamentary_query(query_text)
+            res = self._handle_parliamentary_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 7. Percentage / Proportion / Market Share Query (e.g., "what is the average percentage of mining production in 2021-2022")
-        is_pct_query = is_word_in(["percentage", "percent", "%", "proportion"], query_text) or ("share" in q_lower and "reserves" not in q_lower)
+        is_pct_query = is_word_in(["percentage", "percent", "%", "proportion"], normalized_query) or ("share" in q_lower and "reserves" not in q_lower)
         if is_pct_query:
-            return self._handle_percentage_query(query_text, matched_sub)
+            res = self._handle_percentage_query(normalized_query, matched_sub)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 8. Superlatives & Rankings (Lowest, Highest, Least, Most, Top, Bottom, Underground)
-        is_least = is_word_in(["least", "lowest", "less", "smallest", "minimum", "bottom", "worst"], query_text) or "producing the less" in q_lower or "producing less" in q_lower
-        is_highest = is_word_in(["most", "highest", "largest", "maximum", "top", "biggest", "peak", "leading", "best"], query_text) or "producing the most" in q_lower or "producing highest" in q_lower
-        is_rank_query = is_word_in(["rank", "ranking", "leaderboard", "top 5", "bottom 5"], query_text)
-        is_ug = is_word_in(["underground"], query_text)
-        is_sub_context = is_word_in(["subsidiary", "subsidiaries", "company"], query_text)
+        is_least = is_word_in(["least", "lowest", "less", "smallest", "minimum", "bottom", "worst"], normalized_query) or "producing the less" in q_lower or "producing less" in q_lower
+        is_highest = is_word_in(["most", "highest", "largest", "maximum", "top", "biggest", "peak", "leading", "best"], normalized_query) or "producing the most" in q_lower or "producing highest" in q_lower
+        is_rank_query = is_word_in(["rank", "ranking", "leaderboard", "top 5", "bottom 5"], normalized_query)
+        is_ug = is_word_in(["underground"], normalized_query)
+        is_sub_context = is_word_in(["subsidiary", "subsidiaries", "company"], normalized_query)
 
         if is_least or is_highest or is_rank_query or is_ug:
-            if not (is_word_in(["why", "reason", "cause"], query_text) and is_word_in(["decrease", "drop", "slump", "shortfall"], query_text)):
-                return self._handle_superlative_query(query_text, is_least, is_highest, is_rank_query, is_sub_context, is_ug)
+            if not (is_word_in(["why", "reason", "cause"], normalized_query) and is_word_in(["decrease", "drop", "slump", "shortfall"], normalized_query)):
+                res = self._handle_superlative_query(normalized_query, is_least, is_highest, is_rank_query, is_sub_context, is_ug)
+                return self._annotate_corrections(res, corrections, query_text)
 
         # 9. Average Production Query (in MT)
-        if is_word_in(["average", "mean"], query_text) and is_word_in(["production", "output"], query_text):
-            return self._handle_average_query(query_text)
+        if is_word_in(["average", "mean"], normalized_query) and is_word_in(["production", "output"], normalized_query):
+            res = self._handle_average_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 10. Mine Count Query ("how many mines", "number of mines", "total mines")
         if any(w in q_lower for w in ["how many mines", "number of mines", "count of mines", "list all mines", "total mines"]):
-            return self._handle_mine_count_query(query_text)
+            res = self._handle_mine_count_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 11. Qualitative / Root-Cause Explanation Query
         if any(w in q_lower for w in ["why", "reason", "cause", "downtime", "decrease", "dropped", "declined", "slump", "shortfall"]):
-            return self._handle_explanation_query(query_text)
+            res = self._handle_explanation_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 12. Comparison / Trend & CAGR Query across Subsidiaries
         if any(w in q_lower for w in ["compare", "comparison", "growth of all", "subsidiaries between", "all subsidiaries", "trend and cagr", "cagr", "dispatch matrix"]):
-            return self._handle_comparison_query(query_text)
+            res = self._handle_comparison_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 13. Specific Mine Query
         if matched_mine:
-            return self._handle_specific_mine_query(query_text, matched_mine)
+            res = self._handle_specific_mine_query(normalized_query, matched_mine)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 14. Specific Subsidiary Query
         if matched_sub and matched_sub != "CIL":
-            return self._handle_subsidiary_production_query(query_text, matched_sub)
+            res = self._handle_subsidiary_production_query(normalized_query, matched_sub)
+            return self._annotate_corrections(res, corrections, query_text)
 
         # 15. Total / Consolidated / Annual Production Query (e.g. "what is total production in 2021")
         is_total_query = any(k in q_lower for k in [
@@ -136,10 +195,23 @@ class QueryRouter:
         ]) or q_lower.startswith("production in") or "production in 20" in q_lower or "output in 20" in q_lower
         
         if is_total_query:
-            return self._handle_total_production_query(query_text)
+            res = self._handle_total_production_query(normalized_query)
+            return self._annotate_corrections(res, corrections, query_text)
             
         # 16. Fallback
-        return self._handle_fact_query(query_text)
+        res = self._handle_fact_query(normalized_query)
+        return self._annotate_corrections(res, corrections, query_text)
+
+    def _annotate_corrections(self, result: Dict[str, Any], corrections: Dict[str, str], original_query: str) -> Dict[str, Any]:
+        if corrections:
+            result["auto_corrected"] = True
+            result["original_query"] = original_query
+            result["corrections"] = corrections
+            # Prepend a small, elegant note to the answer
+            corr_list = ", ".join(f"'{k}' -> **{v}**" for k, v in corrections.items())
+            note = f"> *Auto-Corrected Spelling: {corr_list}*\n\n"
+            result["answer"] = note + result.get("answer", "")
+        return result
 
     def _handle_percentage_query(self, query: str, matched_sub: Optional[str] = None) -> Dict[str, Any]:
         target_yr = self._extract_fiscal_year(query) or "2021-22"
@@ -161,7 +233,6 @@ class QueryRouter:
         avg_sub_pct = 100.0 / len(sub_totals) if sub_totals else 0
         avg_mine_pct = 100.0 / len(y_facts) if y_facts else 0
 
-        # If user asked for a specific subsidiary's percentage share
         if matched_sub and matched_sub in sub_totals:
             sub_val = sub_totals[matched_sub]
             sub_share = (sub_val / total_val * 100) if total_val > 0 else 0
@@ -183,7 +254,6 @@ class QueryRouter:
                 "fiscal_year": target_yr
             }
 
-        # Overall percentage distribution and averages
         answer_lines = [
             f"### Mining Production Percentage Analysis (FY {target_yr})\n",
             f"In **Financial Year {target_yr}**, consolidated raw coal production reached **{total_val:.2f} Million Tonnes (MT)** across **{len(y_facts)} active mines** and **{len(sub_totals)} subsidiaries**:\n",
